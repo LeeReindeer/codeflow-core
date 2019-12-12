@@ -18,7 +18,7 @@ public class FlowchartNodeFactory {
 
   private static String randomName() {
     if (nodeCount == Long.MAX_VALUE) nodeCount = 0;
-    return nodeCount++ + RandomStringUtils.randomAlphabetic(1);
+    return "-" + nodeCount++ + RandomStringUtils.randomAlphabetic(1);
   }
 
   public static FlowchartNode fcNode(String name, FlowchartNodeType type) {
@@ -30,7 +30,7 @@ public class FlowchartNodeFactory {
   }
 
   public static FlowchartNode fcNode(FlowchartNodeType type) {
-    return new FlowchartNode(mutNode(type.name())).add(Label.of(type.name())).setType(type);
+    return new FlowchartNode(mutNode(Label.of(type.name()))).setType(type);
   }
 
   public static FlowchartNode uniqueFcNode(FlowchartNodeType type) {

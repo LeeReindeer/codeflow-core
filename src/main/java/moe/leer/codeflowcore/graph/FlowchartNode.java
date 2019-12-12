@@ -102,6 +102,13 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     return mutNode(node.name()).addLink(node.links()).add(node.attrs());
   }
 
+  /**
+   * Copy node without links
+   */
+  public MutableNode isolateCopy() {
+    return mutNode(node.name()).add(node.attrs());
+  }
+
   @Override
   public String toString() {
     return node.toString();
