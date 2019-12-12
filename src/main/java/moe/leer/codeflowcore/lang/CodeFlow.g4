@@ -67,8 +67,7 @@ variableAssign
     ;
 
 leftVariable
-    : (THIS|SUPER|IDENTIFIER)('.'IDENTIFIER)+
-    | IDENTIFIER
+    : variableRef
     ;
 
 variableDeclarators
@@ -85,7 +84,6 @@ variableDeclaratorId
 
 variableInitializer
     : arrayInitializer
-    | (THIS|SUPER|IDENTIFIER)('.'IDENTIFIER)+
     | expression
     ;
 
@@ -198,10 +196,10 @@ booleanExpression
 // 优先级以产生式的顺序来表达
 // bop -> binary op
 expression
-    //fixme support this
     : primary
     | functionCall
-    | objectRef
+    | variableRef
+    | functionCall '.' variableRef   // example: nodes().size;
     | expression '[' expression ']' // array
     | '(' expression ')'
     | expression postfix=('++'|'--')
@@ -224,7 +222,7 @@ expression
     ;
 
 functionCall
-    : objectRef '(' args=expressionList? ')' ('.' functionCall)*
+    : variableRef '(' args=expressionList? ')' ('.' functionCall)*
 //    | THIS '(' expressionList? ')'  // this()
 //    | SUPER '(' expressionList? ')' // super call
     ;
@@ -233,7 +231,7 @@ expressionList
     : expression (',' expression)*
     ;
 
-objectRef
+variableRef
     : IDENTIFIER ('.' IDENTIFIER)*
     | THIS ('.' IDENTIFIER)*  // this
     | SUPER ('.' IDENTIFIER)+  // super
