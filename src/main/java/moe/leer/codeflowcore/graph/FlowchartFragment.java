@@ -1,6 +1,7 @@
 package moe.leer.codeflowcore.graph;
 
 import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.model.Compass;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -79,9 +80,11 @@ public class FlowchartFragment {
   public void link(FlowchartFragment other) {
     for (FlowchartNode stop : this.stops) {
       if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
-        stop.addLink(
-            to(other.start).with(Label.of("false"))
-        );
+        // fixme not graceful
+        stop.links().add(stop.port(Compass.WEST).linkTo(other.start.node).with(Flowchart.falseLable()));
+//        stop.addLink(
+//            to(other.start).with(Label.of("false"))
+//        );
       } else {
         stop.addLink(other.start);
       }

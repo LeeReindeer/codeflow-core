@@ -102,6 +102,18 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     return mutNode(node.name()).addLink(node.links()).add(node.attrs());
   }
 
+  public PortNode port(String record) {
+    return port(record, null);
+  }
+
+  public PortNode port(Compass compass) {
+    return port(null, compass);
+  }
+
+  public PortNode port(String record, Compass compass) {
+    return node.port(record, compass);
+  }
+
   /**
    * Copy node without links
    */

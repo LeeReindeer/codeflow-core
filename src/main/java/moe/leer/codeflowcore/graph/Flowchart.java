@@ -2,6 +2,10 @@ package moe.leer.codeflowcore.graph;
 
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import moe.leer.codeflowcore.util.ANTLRUtil;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.fcNode;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.uniqueFcNode;
@@ -14,6 +18,7 @@ import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.uniqueFcNode;
  * @author leer
  * Created at 12/6/19 3:49 PM
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Flowchart {
 
   public static FlowchartNode startNode() {
@@ -60,12 +65,28 @@ public class Flowchart {
         .add(Shape.RECTANGLE);
   }
 
+  public static FlowchartNode processNode(ParserRuleContext ctx) {
+    String process = ANTLRUtil.getTextFromInputStream(ctx.start.getStartIndex(),
+        ctx.stop.getStopIndex(),
+        ctx.start.getInputStream()
+    );
+    return processNode(process);
+  }
+
   /**
    * Create a UNIQUE node in <code>FlowchartType.DECISION</code> type even if <code>process</code> text is same.
    */
   public static FlowchartNode decisionNode(String decision) {
     return uniqueFcNode(decision, FlowchartNodeType.DECISION)
         .add(Shape.DIAMOND);
+  }
+
+  public static FlowchartNode decisionNode(ParserRuleContext ctx) {
+    String decision = ANTLRUtil.getTextFromInputStream(ctx.start.getStartIndex(),
+        ctx.stop.getStopIndex(),
+        ctx.start.getInputStream()
+    );
+    return decisionNode(decision);
   }
 
   public static Label trueLabel() {

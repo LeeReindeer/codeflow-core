@@ -1,9 +1,9 @@
 package moe.leer.codeflowcore.lang;
 
 import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.model.Compass;
 import moe.leer.codeflowcore.graph.*;
 import moe.leer.codeflowcore.util.ANTLRUtil;
-import org.antlr.v4.runtime.misc.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +12,7 @@ import java.util.Iterator;
 import static moe.leer.codeflowcore.graph.Flowchart.falseLable;
 import static moe.leer.codeflowcore.graph.Flowchart.trueLabel;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
+import static moe.leer.codeflowcore.util.SomeUtil.asArrayList;
 
 
 /**
@@ -56,7 +57,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
   }
 
   /**
-   * There're 14 cases of statement rule
+   * There're 15 cases of statement rule
    */
   @Override
   public FlowchartFragment visitStatement(CodeFlowParser.StatementContext ctx) {
@@ -94,12 +95,11 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
   @Override
   public FlowchartFragment visitIfBlock(CodeFlowParser.IfBlockContext ctx) {
     logger.info("visited ifBlock");
-    int conStart = ctx.parExpression().expression().start.getStartIndex();
-    int conEnd = ctx.parExpression().expression().stop.getStopIndex();
-    String condition = ctx.start.getInputStream().getText(new Interval(conStart, conEnd));
-
-    logger.debug("decision: {}", condition);
-    FlowchartNode decisionNode = Flowchart.decisionNode(condition);
+//    int conStart = ctx.parExpression().expression().start.getStartIndex();
+//    int conEnd = ctx.parExpression().expression().stop.getStopIndex();
+//    String condition = ctx.start.getInputStream().getText(new Interval(conStart, conEnd));
+//    logger.debug("decision: {}", condition);
+    FlowchartNode decisionNode = Flowchart.decisionNode(ctx.parExpression().expression());
 
     CodeFlowParser.StatementContext statementContext = ctx.statement(0);
     // if branch, recursively support nesting other blocks
@@ -163,8 +163,34 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
 
   @Override
   public FlowchartFragment visitForBlock(CodeFlowParser.ForBlockContext ctx) {
-    // todo
-    return super.visitForBlock(ctx);
+    FlowchartFragment forBlockStmtFragment = null;
+    if (ctx.forExpressions().enhancedForExpression() != null) {
+      // todo
+      // translate to Iterator
+    } else {
+      CodeFlowParser.ForInitExpContext forInitExpCtx = ctx.forExpressions().forInitExp();
+      CodeFlowParser.ForConditionExpContext forConditionExpCtx = ctx.forExpressions().forConditionExp();
+      CodeFlowParser.ForUpdateExpContext forUpdateExpCtx = ctx.forExpressions().forUpdateExp();
+      FlowchartNode initNode = Flowchart.processNode(forInitExpCtx);
+      FlowchartNode conditionNode = Flowchart.decisionNode(forConditionExpCtx);
+      FlowchartNode updateNode = Flowchart.processNode(forUpdateExpCtx);
+      // for block
+      if (ctx.statement().block() != null) {
+        forBlockStmtFragment = visitBlockStatements(ctx.statement().block().blockStatements());
+      } else { // for block without braces
+        forBlockStmtFragment = visitStatement(ctx.statement());
+      }
+      forBlockStmtFragment.linkNodeAsStart(conditionNode, trueLabel());
+      forBlockStmtFragment.linkNode2Stop(updateNode);
+//      updateNode.addLink(conditionNode);
+      // fixme not graceful
+      updateNode.links().add(updateNode.port(Compass.EAST).linkTo(conditionNode.port(Compass.EAST)));
+//      updateNode.addLink(conditionNode.port(Compass.EAST));
+      forBlockStmtFragment.linkNodeAsStart(initNode);
+      // has only one stop node--the condition node
+      forBlockStmtFragment.setStops(asArrayList(conditionNode));
+    }
+    return forBlockStmtFragment;
   }
 
   @Override
