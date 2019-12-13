@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
+import static moe.leer.codeflowcore.graph.Flowchart.falseLable;
+import static moe.leer.codeflowcore.graph.Flowchart.trueLabel;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
 
 
@@ -105,7 +107,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
 
     // link decision node as start
     if (firstFragment != null) {
-      firstFragment.linkNode2Start(decisionNode, "true");
+      firstFragment.linkNodeAsStart(decisionNode, trueLabel());
       firstFragment.setType(FlowchartFragmentType.IF);
       // fixme decision is also a end node
       if (decisionNode.isLinkable()) {
@@ -123,7 +125,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
       if (ctx.statement(1).ifBlock() != null) {
         FlowchartFragment elseIf = visitIfBlock(elseBranch.ifBlock());
         firstFragment.getStart().addLink(
-            to(elseIf.getStart()).with(Label.of("false"))
+            to(elseIf.getStart()).with(falseLable())
         );
         firstFragment.removeStopNode(firstFragment.getStart());
         firstFragment.addStopNodes(elseIf.getStops());

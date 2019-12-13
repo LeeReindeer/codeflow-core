@@ -1,5 +1,6 @@
 package moe.leer.codeflowcore.graph;
 
+import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
 
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.fcNode;
@@ -65,5 +66,13 @@ public class Flowchart {
   public static FlowchartNode decisionNode(String decision) {
     return uniqueFcNode(decision, FlowchartNodeType.DECISION)
         .add(Shape.DIAMOND);
+  }
+
+  public static Label trueLabel() {
+    return Label.of("true");
+  }
+
+  public static Label falseLable() {
+    return Label.of("false");
   }
 }

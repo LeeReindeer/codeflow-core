@@ -95,15 +95,14 @@ public class FlowchartFragment {
     stops = other.stops;
   }
 
-  public void linkNode2Start(FlowchartNode newStart) {
+  public void linkNodeAsStart(FlowchartNode newStart) {
     newStart.addLink(start);
     start = newStart;
   }
 
-
-  public void linkNode2Start(FlowchartNode newStart, String linkName) {
+  public void linkNodeAsStart(FlowchartNode newStart, Label linkName) {
     newStart.addLink(
-        to(start).with(Label.of(linkName))
+        to(start).with(linkName)
     );
     start = newStart;
   }
@@ -115,10 +114,10 @@ public class FlowchartFragment {
     this.stops = asArrayList(newStop);
   }
 
-  public void linkNode2Stop(FlowchartNode newStop, String linkName) {
+  public void linkNode2Stop(FlowchartNode newStop, Label linkName) {
     for (FlowchartNode stop : stops) {
       stop.addLink(
-          to(newStop).with(Label.of(linkName))
+          to(newStop).with(linkName)
       );
     }
     this.stops = asArrayList(newStop);
