@@ -103,8 +103,13 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
 
     CodeFlowParser.StatementContext statementContext = ctx.statement(0);
     // if branch, recursively support nesting other blocks
-    FlowchartFragment firstFragment = visitBlockStatements(statementContext.block().blockStatements());
-
+    FlowchartFragment firstFragment;
+    // if block
+    if (statementContext.block() != null && statementContext.block().blockStatements() != null) {
+      firstFragment = visitBlockStatements(statementContext.block().blockStatements());
+    } else { // single if statement without braces
+      firstFragment = visitStatement(statementContext);
+    }
     // link decision node as start
     if (firstFragment != null) {
       firstFragment.linkNodeAsStart(decisionNode, trueLabel());
@@ -130,10 +135,16 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
         firstFragment.removeStopNode(firstFragment.getStart());
         firstFragment.addStopNodes(elseIf.getStops());
       } else { // else
-        FlowchartFragment elseBlock = visitBlockStatements(elseBranch.block().blockStatements());
+        FlowchartFragment elseBlock;
+        if (elseBranch.block() != null) {
+          elseBlock = visitBlockStatements(elseBranch.block().blockStatements());
+        } else {
+          elseBlock = visitStatement(elseBranch);
+        }
 
         Iterator<FlowchartNode> nodeIterator = firstFragment.getStops().iterator();
         FlowchartNode stop;
+        // link decision node to else node, then remove decision from stop nodes
         while (nodeIterator.hasNext()) {
           stop = nodeIterator.next();
           if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
