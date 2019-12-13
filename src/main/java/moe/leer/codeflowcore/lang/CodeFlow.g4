@@ -124,6 +124,7 @@ statement
     | doWhileBlock
     | returnToken=RETURN expression? ';'?
     | breakToken=BREAK IDENTIFIER? ';'?
+    | continueToken=CONTINUE IDENTIFIER';'?
     | gotoToken=GOTO IDENTIFIER ';'?
     | labelStmt=IDENTIFIER ':' statement // label
     | emptyStmt=SEMI
@@ -131,6 +132,7 @@ statement
     | objectDeclarator ';'?
     | variableAssign ';'?
     | expressionStmt=expression ';'? // 表达式语句
+    // todo 三元表达式
     ;
 
 ifBlock
