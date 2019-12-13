@@ -3,13 +3,11 @@ package moe.leer.codeflowcore.lang;
 import guru.nidi.graphviz.attribute.Label;
 import moe.leer.codeflowcore.graph.*;
 import moe.leer.codeflowcore.util.ANTLRUtil;
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.misc.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-import java.util.List;
 
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
 
@@ -44,6 +42,9 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
       }
       preFragment = fragment;
     }
+    if (firstFragment != null) {
+      firstFragment.setStops(preFragment.getStops());
+    }
     return firstFragment;
   }
 
@@ -52,11 +53,14 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
     return super.visitBlockStatement(ctx);
   }
 
+  /**
+   * There're 14 cases of statement rule
+   */
   @Override
   public FlowchartFragment visitStatement(CodeFlowParser.StatementContext ctx) {
     logger.info("visitStatement");
     if (ctx.block() != null) {
-      //todo
+      return super.visitStatement(ctx);
     } else if (ctx.ifBlock() != null) {
       return visitIfBlock(ctx.ifBlock());
     } else if (ctx.forBlock() != null) {
@@ -88,56 +92,26 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
   @Override
   public FlowchartFragment visitIfBlock(CodeFlowParser.IfBlockContext ctx) {
     logger.info("visited ifBlock");
-    int conStart = ctx.parBooleanExpression().booleanExpression().start.getStartIndex();
-    int conEnd = ctx.parBooleanExpression().booleanExpression().stop.getStopIndex();
+    int conStart = ctx.parExpression().expression().start.getStartIndex();
+    int conEnd = ctx.parExpression().expression().stop.getStopIndex();
     String condition = ctx.start.getInputStream().getText(new Interval(conStart, conEnd));
 
     logger.debug("decision: {}", condition);
     FlowchartNode decisionNode = Flowchart.decisionNode(condition);
 
-    int stmtStart, stmtEnd;
-    CharStream input;
-    String stmtString;
-    FlowchartFragment preFragment = null, firstFragment = null;
-    // if branch
     CodeFlowParser.StatementContext statementContext = ctx.statement(0);
-    input = statementContext.start.getInputStream();
-
-    List<CodeFlowParser.BlockStatementContext> stmts = statementContext.block().blockStatements().blockStatement();
-    for (CodeFlowParser.BlockStatementContext blockStmt : stmts) {
-      stmtStart = blockStmt.start.getStartIndex();
-      stmtEnd = blockStmt.stop.getStopIndex();
-      FlowchartNode stmtNode;
-      FlowchartFragment fragment;
-      // nested if
-      if (blockStmt.statement().ifBlock() != null) {
-        fragment = visitIfBlock(blockStmt.statement().ifBlock());
-        fragment.setType(FlowchartFragmentType.IF);
-        //todo consider other type
-      } else {
-        stmtString = input.getText(new Interval(stmtStart, stmtEnd));
-        fragment = FlowchartFragment.singleProcess(Flowchart.processNode(stmtString));
-        logger.debug("process: {}", stmtString);
-      }
-      if (preFragment != null) {
-        preFragment.link(fragment);
-      }
-      if (firstFragment == null) {
-        firstFragment = fragment;
-      }
-      preFragment = fragment;
-    }
+    // if branch, recursively support nesting other blocks
+    FlowchartFragment firstFragment = visitBlockStatements(statementContext.block().blockStatements());
 
     // link decision node as start
     if (firstFragment != null) {
       firstFragment.linkNode2Start(decisionNode, "true");
       firstFragment.setType(FlowchartFragmentType.IF);
-      firstFragment.setStops(preFragment.getStops());
       // fixme decision is also a end node
       if (decisionNode.isLinkable()) {
         firstFragment.addStopNode(decisionNode);
       }
-    } else { // TODO optimize empty if block
+    } else { // TODO optimize empty if block, remove decision node?
       firstFragment = FlowchartFragment.create(FlowchartFragmentType.IF, decisionNode);
       firstFragment.addStopNode(decisionNode);
     }
