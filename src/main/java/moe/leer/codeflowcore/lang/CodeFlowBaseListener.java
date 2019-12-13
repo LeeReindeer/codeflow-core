@@ -438,30 +438,6 @@ public class CodeFlowBaseListener implements CodeFlowListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterParBooleanExpression(CodeFlowParser.ParBooleanExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitParBooleanExpression(CodeFlowParser.ParBooleanExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBooleanExpression(CodeFlowParser.BooleanExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBooleanExpression(CodeFlowParser.BooleanExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterExpression(CodeFlowParser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -498,13 +474,13 @@ public class CodeFlowBaseListener implements CodeFlowListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterObjectRef(CodeFlowParser.ObjectRefContext ctx) { }
+	@Override public void enterVariableRef(CodeFlowParser.VariableRefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitObjectRef(CodeFlowParser.ObjectRefContext ctx) { }
+	@Override public void exitVariableRef(CodeFlowParser.VariableRefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

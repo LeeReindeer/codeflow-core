@@ -223,18 +223,6 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParExpression(CodeFlowParser.ParExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link CodeFlowParser#parBooleanExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParBooleanExpression(CodeFlowParser.ParBooleanExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CodeFlowParser#booleanExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBooleanExpression(CodeFlowParser.BooleanExpressionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -253,11 +241,11 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpressionList(CodeFlowParser.ExpressionListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link CodeFlowParser#objectRef}.
+	 * Visit a parse tree produced by {@link CodeFlowParser#variableRef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitObjectRef(CodeFlowParser.ObjectRefContext ctx);
+	T visitVariableRef(CodeFlowParser.VariableRefContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#typeList}.
 	 * @param ctx the parse tree

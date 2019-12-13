@@ -135,7 +135,7 @@ statement
 
 ifBlock
     // fixme else (a == 3)
-    : IF parBooleanExpression statement (ELSE statement)?
+    : IF parExpression statement (ELSE statement)?
     ;
 
 forBlock
@@ -143,16 +143,16 @@ forBlock
     ;
 
 whileBlock
-    : WHILE parBooleanExpression statement
+    : WHILE parExpression statement
     ;
 
 doWhileBlock
-    :  DO statement WHILE parBooleanExpression
+    :  DO statement WHILE parExpression
     ;
 
 forExpressions
     : enhancedForExpression
-    | forInitExp? ';' forConditionExp? ';' forUpdateExp?
+    | forInitExp? SEMI forConditionExp? SEMI forUpdateExp?
     ;
 
 forInitExp
@@ -161,7 +161,7 @@ forInitExp
     ;
 
 forConditionExp
-    : booleanExpression
+    : expression
     ;
 
 forUpdateExp
@@ -177,20 +177,6 @@ enhancedForExpression
 
 parExpression
     : '(' expression ')'
-    ;
-
-parBooleanExpression
-    : '(' booleanExpression ')'
-    ;
-
-booleanExpression
-    : BOOL_LITERAL
-    | IDENTIFIER
-    | expression ('<' '<' | '>' '>' '>' | '>' '>') expression // <<, >>>, >>
-    | expression bop=('<=' | '>=' | '>' | '<') expression
-    | expression bop=('==' | '!=') expression
-    | expression bop='&&' expression
-    | expression bop='||' expression
     ;
 
 // 优先级以产生式的顺序来表达

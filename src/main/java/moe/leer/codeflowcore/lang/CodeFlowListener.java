@@ -360,26 +360,6 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 */
 	void exitParExpression(CodeFlowParser.ParExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link CodeFlowParser#parBooleanExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterParBooleanExpression(CodeFlowParser.ParBooleanExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CodeFlowParser#parBooleanExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitParBooleanExpression(CodeFlowParser.ParBooleanExpressionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CodeFlowParser#booleanExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterBooleanExpression(CodeFlowParser.BooleanExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CodeFlowParser#booleanExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitBooleanExpression(CodeFlowParser.BooleanExpressionContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#expression}.
 	 * @param ctx the parse tree
 	 */
@@ -410,15 +390,15 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 */
 	void exitExpressionList(CodeFlowParser.ExpressionListContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link CodeFlowParser#objectRef}.
+	 * Enter a parse tree produced by {@link CodeFlowParser#variableRef}.
 	 * @param ctx the parse tree
 	 */
-	void enterObjectRef(CodeFlowParser.ObjectRefContext ctx);
+	void enterVariableRef(CodeFlowParser.VariableRefContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link CodeFlowParser#objectRef}.
+	 * Exit a parse tree produced by {@link CodeFlowParser#variableRef}.
 	 * @param ctx the parse tree
 	 */
-	void exitObjectRef(CodeFlowParser.ObjectRefContext ctx);
+	void exitVariableRef(CodeFlowParser.VariableRefContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#typeList}.
 	 * @param ctx the parse tree
