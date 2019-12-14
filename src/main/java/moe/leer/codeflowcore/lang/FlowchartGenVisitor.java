@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
+import static moe.leer.codeflowcore.graph.Flowchart.trueLabel;
+import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.util.SomeUtil.asArrayList;
 
 
@@ -36,7 +38,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
       if (firstFragment == null) {
         firstFragment = fragment;
       }
-      if (preFragment != null) {
+      if (preFragment != null && preFragment.getType() != FlowchartFragmentType.END) {
         preFragment.link(fragment);
       }
       preFragment = fragment;
@@ -58,6 +60,10 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
   @Override
   public FlowchartFragment visitStatement(CodeFlowParser.StatementContext ctx) {
     logger.info("visitStatement");
+    String single = ANTLRUtil.getTextFromInputStream(
+        ctx.start.getStartIndex(),
+        ctx.stop.getStopIndex(),
+        ctx.start.getInputStream());
     if (ctx.block() != null) {
       return super.visitStatement(ctx);
     } else if (ctx.ifBlock() != null) {
@@ -65,11 +71,11 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
     } else if (ctx.forBlock() != null) {
       return visitForBlock(ctx.forBlock());
     } else if (ctx.whileBlock() != null) {
-
+      return visitWhileBlock(ctx.whileBlock());
     } else if (ctx.doWhileBlock() != null) {
-
+      return visitDoWhileBlock(ctx.doWhileBlock());
     } else if (ctx.returnToken != null) {
-
+      return FlowchartFragment.create(FlowchartFragmentType.END, Flowchart.endNode(single));
     } else if (ctx.breakToken != null) {
 
     } else if (ctx.gotoToken != null) {
@@ -79,10 +85,6 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
     } else if (ctx.labelStmt != null) {
 
     } else { // variableDeclarators,expressionStmt,objectDeclarator,variableAssign
-      String single = ANTLRUtil.getTextFromInputStream(
-          ctx.start.getStartIndex(),
-          ctx.stop.getStopIndex(),
-          ctx.start.getInputStream());
       return FlowchartFragment.singleProcess(Flowchart.processNode(single));
     }
     return null;
@@ -175,18 +177,36 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
       // has only one stop node--the condition node
       forBlockStmtFragment.setStops(asArrayList(conditionNode));
     }
+    forBlockStmtFragment.setType(FlowchartFragmentType.FOR);
     return forBlockStmtFragment;
   }
 
   @Override
   public FlowchartFragment visitWhileBlock(CodeFlowParser.WhileBlockContext ctx) {
-    // todo
-    return super.visitWhileBlock(ctx);
+    FlowchartFragment whileFragment = null;
+    FlowchartNode conditionNode = Flowchart.decisionNode(ctx.parExpression().expression());
+    if (ctx.statement().block() != null) {
+      whileFragment = visitBlockStatements(ctx.statement().block().blockStatements());
+    } else {
+      whileFragment = visitStatement(ctx.statement());
+    }
+    whileFragment.linkDecisionNodeAsTrueStart(conditionNode);
+    whileFragment.linkDecisionNodeAsStop(conditionNode);
+    whileFragment.setType(FlowchartFragmentType.WHILE);
+    return whileFragment;
   }
 
   @Override
   public FlowchartFragment visitDoWhileBlock(CodeFlowParser.DoWhileBlockContext ctx) {
-    // todo
-    return super.visitDoWhileBlock(ctx);
+    FlowchartFragment dowhileFragemnt;
+    FlowchartNode conditionNode = Flowchart.decisionNode(ctx.parExpression().expression());
+    dowhileFragemnt = visitBlockStatements(ctx.block().blockStatements());
+    conditionNode.addLink(
+        compassLink(conditionNode, Compass.EAST, dowhileFragemnt.getStart(), Compass.EAST)
+            .with(trueLabel())
+    );
+    dowhileFragemnt.linkNode2Stop(conditionNode);
+    dowhileFragemnt.setType(FlowchartFragmentType.DO_WHILE);
+    return dowhileFragemnt;
   }
 }

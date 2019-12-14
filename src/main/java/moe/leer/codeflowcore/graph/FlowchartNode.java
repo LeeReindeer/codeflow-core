@@ -195,7 +195,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
   public FlowchartNode addTrueConditionLink(FlowchartNode target, String trueCondition) {
     if (type == FlowchartNodeType.DECISION) {
       addLink(
-          compassLink(this, Compass.CENTER, target).with(Label.of(trueCondition))
+          compassLink(this, Compass.SOUTH, target).with(Label.of(trueCondition))
       );
     } else {
       throw new IllegalStateException(this + " is not a decision node");

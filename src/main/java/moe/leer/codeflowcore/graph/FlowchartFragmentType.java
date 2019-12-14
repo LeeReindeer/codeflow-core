@@ -9,6 +9,8 @@ public enum FlowchartFragmentType {
   FOR,
   WHILE,
   DO_WHILE,
-  GOTO,
+//  LOOP,
+  GOTO, // break, continue, goto
+  END,// return
   SEQUENCE // normal sequential statements
 }

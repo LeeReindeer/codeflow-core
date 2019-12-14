@@ -149,7 +149,7 @@ whileBlock
     ;
 
 doWhileBlock
-    :  DO statement WHILE parExpression
+    :  DO block WHILE parExpression ';'?
     ;
 
 forExpressions
@@ -184,10 +184,10 @@ parExpression
 // 优先级以产生式的顺序来表达
 // bop -> binary op
 expression
-    : primary
-    | functionCall
+    : functionCall
     | variableRef
     | functionCall '.' variableRef   // example: nodes().size;
+    | primary
     | expression '[' expression ']' // array
     | '(' expression ')'
     | expression postfix=('++'|'--')

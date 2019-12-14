@@ -80,7 +80,11 @@ public class FlowchartFragment {
    */
   public void link(FlowchartFragment other) {
     for (FlowchartNode stop : this.stops) {
-      if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
+      if (this.getType() == FlowchartFragmentType.DO_WHILE) { // special port compass for "do while" loop
+        stop.addLink(
+            compassLink(stop, Compass.SOUTH, other.start).with(Flowchart.falseLable())
+        );
+      } else if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
         stop.addFalseConditionLink(other.start);
       } else {
         stop.addLink(other.start);
@@ -119,6 +123,13 @@ public class FlowchartFragment {
       stop.addLink(newStop);
     }
     this.stops = asArrayList(newStop);
+  }
+
+  public void linkDecisionNodeAsStop(FlowchartNode decisionNode) {
+    for (FlowchartNode stop : stops) {
+      stop.addLink(Compass.EAST, decisionNode, Compass.EAST);
+    }
+    this.stops = asArrayList(decisionNode);
   }
 
   public void linkNode2Stop(FlowchartNode newStop, Label linkName) {
