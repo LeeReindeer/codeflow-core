@@ -11,6 +11,7 @@ import java.util.List;
 
 import static guru.nidi.graphviz.model.Factory.mutNode;
 import static java.util.Arrays.asList;
+import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 
 /**
  * Proxy of <code>MutableNode</code>
@@ -151,6 +152,72 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
       links().add(linkTo(target));
     } else {
       throw new IllegalStateException("failed to link " + target + ", when node's out-degree is " + this.links().size());
+    }
+    return this;
+  }
+
+  public FlowchartNode addLink(LinkTarget target, Label label) {
+    if (this.isLinkable()) {
+      links().add(linkTo(target).with(label));
+    } else {
+      throw new IllegalStateException("failed to link " + target + ", when node's out-degree is " + this.links().size());
+    }
+    return this;
+  }
+
+  public FlowchartNode addLink(Compass sourceCompass, FlowchartNode target, Compass targetCompass) {
+    if (this.isLinkable()) {
+      links().add(this.port(sourceCompass).linkTo(target.port(targetCompass)));
+    } else {
+      throw new IllegalStateException("failed to link " + target + ", when node's out-degree is " + this.links().size());
+    }
+    return this;
+  }
+
+  public FlowchartNode addLink(FlowchartNode target, Compass targetCompass) {
+    return addLink(Compass.CENTER, target, Compass.CENTER);
+  }
+
+  public FlowchartNode addLink(Compass sourceCompass, FlowchartNode target) {
+    return addLink(sourceCompass, target, Compass.CENTER);
+  }
+
+
+  public FlowchartNode addLink(Link link) {
+    if (this.isLinkable()) {
+      links().add(link);
+    } else {
+      throw new IllegalStateException("failed add link " + link + ", when node's out-degree is " + this.links().size());
+    }
+    return this;
+  }
+
+  public FlowchartNode addTrueConditionLink(FlowchartNode target, String trueCondition) {
+    if (type == FlowchartNodeType.DECISION) {
+      addLink(
+          compassLink(this, Compass.CENTER, target).with(Label.of(trueCondition))
+      );
+    } else {
+      throw new IllegalStateException(this + " is not a decision node");
+    }
+    return this;
+  }
+
+  public FlowchartNode addTrueConditionLink(FlowchartNode target) {
+    return addTrueConditionLink(target, "true");
+  }
+
+  public FlowchartNode addFalseConditionLink(FlowchartNode target) {
+    return addFalseConditionLink(target, "false");
+  }
+
+  public FlowchartNode addFalseConditionLink(FlowchartNode target, String falseCondition) {
+    if (type == FlowchartNodeType.DECISION) {
+      addLink(
+          compassLink(this, Compass.WEST, target).with(Label.of(falseCondition))
+      );
+    } else {
+      throw new IllegalStateException(this + " is not a decision node");
     }
     return this;
   }

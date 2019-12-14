@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
 import static moe.leer.codeflowcore.util.SomeUtil.asArrayList;
 
@@ -80,21 +81,11 @@ public class FlowchartFragment {
   public void link(FlowchartFragment other) {
     for (FlowchartNode stop : this.stops) {
       if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
-        // fixme not graceful
-        stop.links().add(stop.port(Compass.WEST).linkTo(other.start.node).with(Flowchart.falseLable()));
-//        stop.addLink(
-//            to(other.start).with(Label.of("false"))
-//        );
+        stop.addFalseConditionLink(other.start);
       } else {
         stop.addLink(other.start);
       }
     }
-    // link "false" decision to other's start
-//    if (this.type == FlowchartFragmentType.IF && this.getStart().links().size() < 2) {
-//      this.getStart().addLink(
-//          to(other.start).with(Label.of("false"))
-//      );
-//    }
     stops = other.stops;
   }
 
@@ -108,6 +99,19 @@ public class FlowchartFragment {
         to(start).with(linkName)
     );
     start = newStart;
+  }
+
+  /**
+   * newStart:startCompass -> start
+   */
+  public void linkNodeAsStart(FlowchartNode newStart, Compass startCompass, Label linkName) {
+    newStart.addLink(compassLink(newStart, startCompass, start).with(linkName));
+    start = newStart;
+  }
+
+  public void linkDecisionNodeAsTrueStart(FlowchartNode decisionNode) {
+    decisionNode.addTrueConditionLink(start);
+    start = decisionNode;
   }
 
   public void linkNode2Stop(FlowchartNode newStop) {

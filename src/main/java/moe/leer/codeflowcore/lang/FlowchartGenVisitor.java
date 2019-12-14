@@ -1,6 +1,5 @@
 package moe.leer.codeflowcore.lang;
 
-import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.Compass;
 import moe.leer.codeflowcore.graph.*;
 import moe.leer.codeflowcore.util.ANTLRUtil;
@@ -9,9 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
-import static moe.leer.codeflowcore.graph.Flowchart.falseLable;
-import static moe.leer.codeflowcore.graph.Flowchart.trueLabel;
-import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
 import static moe.leer.codeflowcore.util.SomeUtil.asArrayList;
 
 
@@ -95,10 +91,6 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
   @Override
   public FlowchartFragment visitIfBlock(CodeFlowParser.IfBlockContext ctx) {
     logger.info("visited ifBlock");
-//    int conStart = ctx.parExpression().expression().start.getStartIndex();
-//    int conEnd = ctx.parExpression().expression().stop.getStopIndex();
-//    String condition = ctx.start.getInputStream().getText(new Interval(conStart, conEnd));
-//    logger.debug("decision: {}", condition);
     FlowchartNode decisionNode = Flowchart.decisionNode(ctx.parExpression().expression());
 
     CodeFlowParser.StatementContext statementContext = ctx.statement(0);
@@ -112,7 +104,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
     }
     // link decision node as start
     if (firstFragment != null) {
-      firstFragment.linkNodeAsStart(decisionNode, trueLabel());
+      firstFragment.linkDecisionNodeAsTrueStart(decisionNode);
       firstFragment.setType(FlowchartFragmentType.IF);
       // fixme decision is also a end node
       if (decisionNode.isLinkable()) {
@@ -129,9 +121,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
       // else if
       if (ctx.statement(1).ifBlock() != null) {
         FlowchartFragment elseIf = visitIfBlock(elseBranch.ifBlock());
-        firstFragment.getStart().addLink(
-            to(elseIf.getStart()).with(falseLable())
-        );
+        firstFragment.getStart().addFalseConditionLink(elseIf.getStart());
         firstFragment.removeStopNode(firstFragment.getStart());
         firstFragment.addStopNodes(elseIf.getStops());
       } else { // else
@@ -148,9 +138,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
         while (nodeIterator.hasNext()) {
           stop = nodeIterator.next();
           if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
-            stop.addLink(
-                to(elseBlock.getStart()).with(Label.of("false"))
-            );
+            stop.addFalseConditionLink(elseBlock.getStart());
             nodeIterator.remove();
           }
         }
@@ -180,12 +168,9 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
       } else { // for block without braces
         forBlockStmtFragment = visitStatement(ctx.statement());
       }
-      forBlockStmtFragment.linkNodeAsStart(conditionNode, trueLabel());
+      forBlockStmtFragment.linkDecisionNodeAsTrueStart(conditionNode);
       forBlockStmtFragment.linkNode2Stop(updateNode);
-//      updateNode.addLink(conditionNode);
-      // fixme not graceful
-      updateNode.links().add(updateNode.port(Compass.EAST).linkTo(conditionNode.port(Compass.EAST)));
-//      updateNode.addLink(conditionNode.port(Compass.EAST));
+      updateNode.addLink(Compass.EAST, conditionNode, Compass.EAST);
       forBlockStmtFragment.linkNodeAsStart(initNode);
       // has only one stop node--the condition node
       forBlockStmtFragment.setStops(asArrayList(conditionNode));

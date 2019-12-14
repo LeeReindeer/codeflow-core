@@ -1,6 +1,7 @@
 package moe.leer.codeflowcore.graph;
 
 import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.model.Compass;
 import guru.nidi.graphviz.model.Link;
 import guru.nidi.graphviz.model.LinkTarget;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -44,5 +45,19 @@ public class FlowchartNodeFactory {
     return Link.to(node);
   }
 
+  /**
+   * source:sourceCompass -> target:targetCompass
+   *
+   * @return link between nodes
+   */
+  public static Link compassLink(FlowchartNode source, Compass sourceCompass, FlowchartNode target, Compass targetCompass) {
+    return source.port(sourceCompass).linkTo(target.port(targetCompass));
+  }
 
+  /**
+   * source:sourceCompass -> target
+   */
+  public static Link compassLink(FlowchartNode source, Compass sourceCompass, FlowchartNode target) {
+    return source.port(sourceCompass).linkTo(target.port(Compass.CENTER));
+  }
 }
