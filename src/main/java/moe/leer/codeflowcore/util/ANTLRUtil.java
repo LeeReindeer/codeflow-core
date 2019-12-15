@@ -3,6 +3,7 @@ package moe.leer.codeflowcore.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
 /**
@@ -13,5 +14,9 @@ import org.antlr.v4.runtime.misc.Interval;
 public class ANTLRUtil {
   public static String getTextFromInputStream(int start, int stop, CharStream input) {
     return input.getText(Interval.of(start, stop));
+  }
+
+  public static String getTextFromInputStream(ParserRuleContext context) {
+    return getTextFromInputStream(context.start.getStartIndex(), context.stop.getStopIndex(), context.start.getInputStream());
   }
 }

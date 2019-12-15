@@ -60,10 +60,7 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
   @Override
   public FlowchartFragment visitStatement(CodeFlowParser.StatementContext ctx) {
     logger.info("visitStatement");
-    String single = ANTLRUtil.getTextFromInputStream(
-        ctx.start.getStartIndex(),
-        ctx.stop.getStopIndex(),
-        ctx.start.getInputStream());
+    String single = ANTLRUtil.getTextFromInputStream(ctx);
     if (ctx.block() != null) {
       return super.visitStatement(ctx);
     } else if (ctx.ifBlock() != null) {

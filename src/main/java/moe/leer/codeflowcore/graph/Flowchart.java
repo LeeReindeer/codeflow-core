@@ -66,10 +66,7 @@ public class Flowchart {
   }
 
   public static FlowchartNode processNode(ParserRuleContext ctx) {
-    String process = ANTLRUtil.getTextFromInputStream(ctx.start.getStartIndex(),
-        ctx.stop.getStopIndex(),
-        ctx.start.getInputStream()
-    );
+    String process = ANTLRUtil.getTextFromInputStream(ctx);
     return processNode(process);
   }
 
@@ -82,10 +79,7 @@ public class Flowchart {
   }
 
   public static FlowchartNode decisionNode(ParserRuleContext ctx) {
-    String decision = ANTLRUtil.getTextFromInputStream(ctx.start.getStartIndex(),
-        ctx.stop.getStopIndex(),
-        ctx.start.getInputStream()
-    );
+    String decision = ANTLRUtil.getTextFromInputStream(ctx);
     return decisionNode(decision);
   }
 
