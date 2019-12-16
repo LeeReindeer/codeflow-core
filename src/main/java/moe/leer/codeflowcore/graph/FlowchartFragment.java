@@ -2,6 +2,7 @@ package moe.leer.codeflowcore.graph;
 
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.Compass;
+import guru.nidi.graphviz.model.MutableGraph;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,6 +42,10 @@ public class FlowchartFragment {
     return new FlowchartFragment(start, asArrayList(end), type);
   }
 
+  public static FlowchartFragment create(FlowchartFragmentType type, FlowchartNode start, List<FlowchartNode> ends) {
+    return new FlowchartFragment(start, ends, type);
+  }
+
   public FlowchartFragment(FlowchartNode start, List<FlowchartNode> stops) {
     this.start = start;
     this.stops = stops;
@@ -53,6 +58,11 @@ public class FlowchartFragment {
   }
 
   private FlowchartFragmentType type;
+
+  /**
+   * root graph or subgraph
+   */
+  private MutableGraph graph;
 
   /**
    * A start node can also be a stop node, like decision node

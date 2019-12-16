@@ -11,6 +11,7 @@ import java.util.List;
 
 import static guru.nidi.graphviz.model.Factory.mutNode;
 import static java.util.Arrays.asList;
+import static moe.leer.codeflowcore.TodoException.TODO;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 
 /**
@@ -220,6 +221,16 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
       throw new IllegalStateException(this + " is not a decision node");
     }
     return this;
+  }
+
+  public FlowchartNode addFunctionCallLink(FlowchartNode function) {
+    //todo
+    throw TODO();
+  }
+
+  public FlowchartNode addCommentLink(FlowchartNode comment) {
+    //todo
+    throw TODO();
   }
 
   public FlowchartNode addLink(String node) {

@@ -1,19 +1,30 @@
 package moe.leer.codeflowcore.lang;
 
+import guru.nidi.graphviz.attribute.Color;
+import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.attribute.Style;
 import guru.nidi.graphviz.model.Compass;
+import guru.nidi.graphviz.model.MutableGraph;
 import moe.leer.codeflowcore.graph.*;
+import moe.leer.codeflowcore.lang.parser.CodeFlowBaseVisitor;
+import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.util.ANTLRUtil;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import java.util.List;
 
+import static guru.nidi.graphviz.model.Factory.mutGraph;
 import static moe.leer.codeflowcore.graph.Flowchart.trueLabel;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.util.SomeUtil.asArrayList;
 
 
 /**
+ * Not class but function/method/statements as graph or sub-graph
+ *
  * @author leer
  * Created at 12/6/19 9:25 PM
  */
@@ -26,36 +37,71 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
     return super.visitProgram(ctx);
   }
 
+  private FlowchartFragment linkStatements(ParserRuleContext ctx) {
+    if (ctx instanceof CodeFlowParser.BlockStatementsContext || ctx instanceof CodeFlowParser.TopLevelStmtsContext) {
+      List<CodeFlowParser.BlockStatementContext> blockStatements;
+      if (ctx instanceof CodeFlowParser.BlockStatementsContext) {
+        blockStatements = ((CodeFlowParser.BlockStatementsContext) ctx).blockStatement();
+      } else {
+        blockStatements = ((CodeFlowParser.TopLevelStmtsContext) ctx).blockStatement();
+      }
+      FlowchartFragment preFragment = null, firstFragment = null;
+      for (CodeFlowParser.BlockStatementContext context : blockStatements) {
+        FlowchartFragment fragment = visitBlockStatement(context);
+        logger.debug("fragment: {}", fragment);
+        if (firstFragment == null) {
+          firstFragment = fragment;
+        }
+        if (preFragment != null && preFragment.getType() != FlowchartFragmentType.END) {
+          preFragment.link(fragment);
+        }
+        preFragment = fragment;
+      }
+      if (firstFragment != null) {
+        firstFragment.setStops(preFragment.getStops());
+      }
+      return firstFragment;
+    }
+    return null;
+  }
+
+  @Override
+  public FlowchartFragment visitTopLevelStmts(CodeFlowParser.TopLevelStmtsContext ctx) {
+    return linkStatements(ctx);
+  }
+
+  /**
+   * Treat toplevel function and class method as same level, that is toplevel function and class method is at the same level of graph
+   */
+  @Override
+  public FlowchartFragment visitFunctionDeclare(CodeFlowParser.FunctionDeclareContext ctx) {
+    // todo add function subgraph
+    FlowchartFragment fragment = null;
+    // only blockStatements can be null
+    if (ctx.functionBody().block().blockStatements() != null) {
+      FlowchartFragment functionBody = visitBlockStatements(ctx.functionBody().block().blockStatements());
+      String functionFullName = ctx.IDENTIFIER().getText() + ANTLRUtil.getTextFromInputStream(ctx.formalParams());
+      MutableGraph subgraph = mutGraph()
+          .setCluster(true).setDirected(true);
+      subgraph.graphAttrs().add(Label.of("function " + ctx.IDENTIFIER().getText()));
+      subgraph.add(functionBody.getStart());
+      fragment = FlowchartFragment.create(FlowchartFragmentType.FUNCTION, functionBody.getStart(), functionBody.getStops());
+      fragment.setGraph(subgraph);
+      return fragment;
+    }
+    return null;
+  }
+
   /**
    * Link all statement FlowchartFragments
    */
   @Override
   public FlowchartFragment visitBlockStatements(CodeFlowParser.BlockStatementsContext ctx) {
-    FlowchartFragment preFragment = null, firstFragment = null;
-    for (CodeFlowParser.BlockStatementContext context : ctx.blockStatement()) {
-      FlowchartFragment fragment = visitBlockStatement(context);
-      logger.debug("fragment: {}", fragment);
-      if (firstFragment == null) {
-        firstFragment = fragment;
-      }
-      if (preFragment != null && preFragment.getType() != FlowchartFragmentType.END) {
-        preFragment.link(fragment);
-      }
-      preFragment = fragment;
-    }
-    if (firstFragment != null) {
-      firstFragment.setStops(preFragment.getStops());
-    }
-    return firstFragment;
-  }
-
-  @Override
-  public FlowchartFragment visitBlockStatement(CodeFlowParser.BlockStatementContext ctx) {
-    return super.visitBlockStatement(ctx);
+    return linkStatements(ctx);
   }
 
   /**
-   * There're 15 cases of statement rule
+   * There're 14 cases of statement rule
    */
   @Override
   public FlowchartFragment visitStatement(CodeFlowParser.StatementContext ctx) {
@@ -75,16 +121,31 @@ public class FlowchartGenVisitor extends CodeFlowBaseVisitor<FlowchartFragment> 
       return FlowchartFragment.create(FlowchartFragmentType.END, Flowchart.endNode(single));
     } else if (ctx.breakToken != null) {
 
+    } else if (ctx.continueToken != null) {
+
     } else if (ctx.gotoToken != null) {
 
     } else if (ctx.emptyStmt != null) {
 
     } else if (ctx.labelStmt != null) {
 
-    } else { // variableDeclarators,expressionStmt,objectDeclarator,variableAssign
+    } else if (ctx.expressionStmt != null) {
+      visitExpression(ctx.expressionStmt);
+    } else { // variableDeclarators ,variableAssign
       return FlowchartFragment.singleProcess(Flowchart.processNode(single));
     }
     return null;
+  }
+
+  @Override
+  public FlowchartFragment visitExpression(CodeFlowParser.ExpressionContext ctx) {
+    if (ctx.functionCall() != null) {
+      // todo link function call, use ParseTreeProperty to save function call node
+      FlowchartNode call = Flowchart.processNode(ctx).add(Color.LIGHTBLUE, Style.FILLED);
+      return FlowchartFragment.create(FlowchartFragmentType.FUNCTION, call, call);
+    } else {
+      return FlowchartFragment.singleProcess(Flowchart.processNode(ctx));
+    }
   }
 
   @Override
