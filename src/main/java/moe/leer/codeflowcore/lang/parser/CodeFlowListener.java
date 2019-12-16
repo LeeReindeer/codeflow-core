@@ -1,6 +1,6 @@
 // Generated from CodeFlow.g4 by ANTLR 4.7.2
 
-package moe.leer.codeflowcore.lang;
+package moe.leer.codeflowcore.lang.parser;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -10,15 +10,125 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface CodeFlowListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link CodeFlowParser#accessModifiers}.
+	 * Enter a parse tree produced by {@link CodeFlowParser#program}.
 	 * @param ctx the parse tree
 	 */
-	void enterAccessModifiers(CodeFlowParser.AccessModifiersContext ctx);
+	void enterProgram(CodeFlowParser.ProgramContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link CodeFlowParser#accessModifiers}.
+	 * Exit a parse tree produced by {@link CodeFlowParser#program}.
 	 * @param ctx the parse tree
 	 */
-	void exitAccessModifiers(CodeFlowParser.AccessModifiersContext ctx);
+	void exitProgram(CodeFlowParser.ProgramContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#topLevelFunctions}.
+	 * @param ctx the parse tree
+	 */
+	void enterTopLevelFunctions(CodeFlowParser.TopLevelFunctionsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#topLevelFunctions}.
+	 * @param ctx the parse tree
+	 */
+	void exitTopLevelFunctions(CodeFlowParser.TopLevelFunctionsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#topLevelStmts}.
+	 * @param ctx the parse tree
+	 */
+	void enterTopLevelStmts(CodeFlowParser.TopLevelStmtsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#topLevelStmts}.
+	 * @param ctx the parse tree
+	 */
+	void exitTopLevelStmts(CodeFlowParser.TopLevelStmtsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#packageDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterPackageDeclaration(CodeFlowParser.PackageDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#packageDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitPackageDeclaration(CodeFlowParser.PackageDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterImportDeclaration(CodeFlowParser.ImportDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitImportDeclaration(CodeFlowParser.ImportDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#declaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeclaration(CodeFlowParser.DeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#declaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeclaration(CodeFlowParser.DeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#classDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassDeclaration(CodeFlowParser.ClassDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#classDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassDeclaration(CodeFlowParser.ClassDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#classBody}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassBody(CodeFlowParser.ClassBodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#classBody}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassBody(CodeFlowParser.ClassBodyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#classBodyDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassBodyDeclaration(CodeFlowParser.ClassBodyDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#classBodyDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassBodyDeclaration(CodeFlowParser.ClassBodyDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#member}.
+	 * @param ctx the parse tree
+	 */
+	void enterMember(CodeFlowParser.MemberContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#member}.
+	 * @param ctx the parse tree
+	 */
+	void exitMember(CodeFlowParser.MemberContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#classOrInterfacemodifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassOrInterfacemodifier(CodeFlowParser.ClassOrInterfacemodifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#classOrInterfacemodifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassOrInterfacemodifier(CodeFlowParser.ClassOrInterfacemodifierContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#classOrInterfacemodifiers}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassOrInterfacemodifiers(CodeFlowParser.ClassOrInterfacemodifiersContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#classOrInterfacemodifiers}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassOrInterfacemodifiers(CodeFlowParser.ClassOrInterfacemodifiersContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#functionDeclare}.
 	 * @param ctx the parse tree
@@ -49,6 +159,26 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitQualifiedNameList(CodeFlowParser.QualifiedNameListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#typeArguments}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeArguments(CodeFlowParser.TypeArgumentsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#typeArguments}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeArguments(CodeFlowParser.TypeArgumentsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#typeArgument}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypeArgument(CodeFlowParser.TypeArgumentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#typeArgument}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypeArgument(CodeFlowParser.TypeArgumentContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#formalParams}.
 	 * @param ctx the parse tree
@@ -140,16 +270,6 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 */
 	void exitVariableAssign(CodeFlowParser.VariableAssignContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link CodeFlowParser#leftVariable}.
-	 * @param ctx the parse tree
-	 */
-	void enterLeftVariable(CodeFlowParser.LeftVariableContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CodeFlowParser#leftVariable}.
-	 * @param ctx the parse tree
-	 */
-	void exitLeftVariable(CodeFlowParser.LeftVariableContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#variableDeclarators}.
 	 * @param ctx the parse tree
 	 */
@@ -209,16 +329,6 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitObjectDeclarator(CodeFlowParser.ObjectDeclaratorContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link CodeFlowParser#program}.
-	 * @param ctx the parse tree
-	 */
-	void enterProgram(CodeFlowParser.ProgramContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link CodeFlowParser#program}.
-	 * @param ctx the parse tree
-	 */
-	void exitProgram(CodeFlowParser.ProgramContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#block}.
 	 * @param ctx the parse tree
@@ -380,6 +490,16 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 */
 	void exitFunctionCall(CodeFlowParser.FunctionCallContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#arguments}.
+	 * @param ctx the parse tree
+	 */
+	void enterArguments(CodeFlowParser.ArgumentsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#arguments}.
+	 * @param ctx the parse tree
+	 */
+	void exitArguments(CodeFlowParser.ArgumentsContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#expressionList}.
 	 * @param ctx the parse tree
 	 */
@@ -389,6 +509,16 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpressionList(CodeFlowParser.ExpressionListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#functionCallName}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionCallName(CodeFlowParser.FunctionCallNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#functionCallName}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionCallName(CodeFlowParser.FunctionCallNameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#variableRef}.
 	 * @param ctx the parse tree
@@ -419,6 +549,46 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVariableType(CodeFlowParser.VariableTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#creator}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreator(CodeFlowParser.CreatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#creator}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreator(CodeFlowParser.CreatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#createdName}.
+	 * @param ctx the parse tree
+	 */
+	void enterCreatedName(CodeFlowParser.CreatedNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#createdName}.
+	 * @param ctx the parse tree
+	 */
+	void exitCreatedName(CodeFlowParser.CreatedNameContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#classCreatorRest}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassCreatorRest(CodeFlowParser.ClassCreatorRestContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#classCreatorRest}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassCreatorRest(CodeFlowParser.ClassCreatorRestContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#arrayCreatorRest}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayCreatorRest(CodeFlowParser.ArrayCreatorRestContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#arrayCreatorRest}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayCreatorRest(CodeFlowParser.ArrayCreatorRestContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#classOrInterfaceType}.
 	 * @param ctx the parse tree

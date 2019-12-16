@@ -1,6 +1,6 @@
 // Generated from CodeFlow.g4 by ANTLR 4.7.2
 
-package moe.leer.codeflowcore.lang;
+package moe.leer.codeflowcore.lang.parser;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -13,11 +13,77 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link CodeFlowParser#accessModifiers}.
+	 * Visit a parse tree produced by {@link CodeFlowParser#program}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAccessModifiers(CodeFlowParser.AccessModifiersContext ctx);
+	T visitProgram(CodeFlowParser.ProgramContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#topLevelFunctions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTopLevelFunctions(CodeFlowParser.TopLevelFunctionsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#topLevelStmts}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTopLevelStmts(CodeFlowParser.TopLevelStmtsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#packageDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPackageDeclaration(CodeFlowParser.PackageDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#importDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitImportDeclaration(CodeFlowParser.ImportDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclaration(CodeFlowParser.DeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#classDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassDeclaration(CodeFlowParser.ClassDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#classBody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassBody(CodeFlowParser.ClassBodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#classBodyDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassBodyDeclaration(CodeFlowParser.ClassBodyDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#member}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMember(CodeFlowParser.MemberContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#classOrInterfacemodifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassOrInterfacemodifier(CodeFlowParser.ClassOrInterfacemodifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#classOrInterfacemodifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassOrInterfacemodifiers(CodeFlowParser.ClassOrInterfacemodifiersContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#functionDeclare}.
 	 * @param ctx the parse tree
@@ -36,6 +102,18 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitQualifiedNameList(CodeFlowParser.QualifiedNameListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#typeArguments}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeArguments(CodeFlowParser.TypeArgumentsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#typeArgument}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeArgument(CodeFlowParser.TypeArgumentContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#formalParams}.
 	 * @param ctx the parse tree
@@ -91,12 +169,6 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVariableAssign(CodeFlowParser.VariableAssignContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link CodeFlowParser#leftVariable}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLeftVariable(CodeFlowParser.LeftVariableContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#variableDeclarators}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -132,12 +204,6 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitObjectDeclarator(CodeFlowParser.ObjectDeclaratorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link CodeFlowParser#program}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitProgram(CodeFlowParser.ProgramContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#block}.
 	 * @param ctx the parse tree
@@ -235,11 +301,23 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunctionCall(CodeFlowParser.FunctionCallContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#arguments}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArguments(CodeFlowParser.ArgumentsContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#expressionList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExpressionList(CodeFlowParser.ExpressionListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#functionCallName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionCallName(CodeFlowParser.FunctionCallNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#variableRef}.
 	 * @param ctx the parse tree
@@ -258,6 +336,30 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitVariableType(CodeFlowParser.VariableTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#creator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreator(CodeFlowParser.CreatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#createdName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCreatedName(CodeFlowParser.CreatedNameContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#classCreatorRest}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassCreatorRest(CodeFlowParser.ClassCreatorRestContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#arrayCreatorRest}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayCreatorRest(CodeFlowParser.ArrayCreatorRestContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#classOrInterfaceType}.
 	 * @param ctx the parse tree

@@ -1,6 +1,6 @@
 // Generated from CodeFlow.g4 by ANTLR 4.7.2
 
-package moe.leer.codeflowcore.lang;
+package moe.leer.codeflowcore.lang.parser;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

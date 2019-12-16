@@ -4,19 +4,75 @@ grammar CodeFlow;
 import CommonLexer;
 
 @header {
-package moe.leer.codeflowcore.lang;
+package moe.leer.codeflowcore.lang.parser;
 }
 
-// todo new Object
+// support toplevel function, toplevel statement
+program
+    : packageDeclaration? importDeclaration* declaration*
+    ;
 
-accessModifiers
+topLevelFunctions
+    : functionDeclare+
+    ;
+
+topLevelStmts
+    : blockStatement+
+    ;
+
+packageDeclaration
+    :   'package' qualifiedName ';'
+    ;
+
+importDeclaration
+    :   'import' 'static'? qualifiedName ('.' '*')? ';'
+    ;
+
+declaration
+    : classOrInterfacemodifiers classDeclaration
+    | topLevelFunctions
+    | topLevelStmts
+    | ';'
+    ;
+
+classDeclaration
+    :   CLASS IDENTIFIER typeArguments? (EXTENDS variableType)?
+        (IMPLEMENTS typeList)?
+        classBody
+    ;
+
+classBody
+    :   '{' classBodyDeclaration* '}'
+    ;
+
+classBodyDeclaration
+    :   ';'
+    |   'static'? block
+    |   classOrInterfacemodifiers member
+    ;
+
+member
+    : functionDeclare
+    | fieldDeclare
+    | constructorDeclare
+    | classDeclaration
+    ;
+
+classOrInterfacemodifier
     : PUBLIC
     | PROTECTED
     | PRIVATE
+    | ABSTRACT
+    | STATIC
+    | FINAL // class only
+    ;
+
+classOrInterfacemodifiers
+    : classOrInterfacemodifier*
     ;
 
 functionDeclare
-    : (accessModifiers? ((STATIC? FINAL?)|(FINAL? STATIC?))) typeOrVoid IDENTIFIER formalParams ('[' ']')*
+    : classOrInterfacemodifiers typeOrVoid IDENTIFIER formalParams
       (THROWS qualifiedNameList)?
       functionBody
     ;
@@ -28,6 +84,16 @@ functionBody
 
 qualifiedNameList
     : qualifiedName (',' qualifiedName)*
+    ;
+
+// generic type no wildcard
+typeArguments
+    :   '<' typeArgument (',' typeArgument)* '>'
+    ;
+
+typeArgument
+    :   variableType
+    |   '?' (('extends' | 'super') variableType)?
     ;
 
 formalParams
@@ -55,7 +121,7 @@ qualifiedName
     ;
 
 fieldDeclare
-    : (accessModifiers? ((STATIC? FINAL?)|(FINAL? STATIC?)))  variableDeclarators ';'?
+    : classOrInterfacemodifiers variableDeclarators ';'?
     ;
 
 constructorDeclare
@@ -63,11 +129,7 @@ constructorDeclare
     ;
 
 variableAssign
-    : leftVariable '=' variableInitializer
-    ;
-
-leftVariable
-    : variableRef
+    : variableId=expression '=' variableInitializer
     ;
 
 variableDeclarators
@@ -97,13 +159,6 @@ objectDeclarator
 
 // Statement
 
-program
-    : blockStatements
-    | functionDeclare
-    | fieldDeclare
-//    | classDeclare
-    ;
-
 block
     : '{' blockStatements '}'
     ;
@@ -129,7 +184,7 @@ statement
     | labelStmt=IDENTIFIER ':' statement // label
     | emptyStmt=SEMI
     | variableDeclarators ';'?
-    | objectDeclarator ';'?
+//    | objectDeclarator ';'?
     | variableAssign ';'?
     | expressionStmt=expression ';'? // 表达式语句
     // todo 三元表达式
@@ -190,9 +245,11 @@ expression
     | primary
     | expression '[' expression ']' // array
     | '(' expression ')'
+    | NEW creator
     | expression postfix=('++'|'--')
     | prefix=('+'|'-'|'++'|'--') expression
     | prefix=('!'|'~') expression
+    | '(' variableType ')' expression // type convert
     | expression bop=('*'|'/'|'%') expression
     | expression bop=('+'|'-') expression
     | expression ('<' '<' | '>' '>' '>' | '>' '>') expression // <<, >>>, >>
@@ -210,13 +267,21 @@ expression
     ;
 
 functionCall
-    : variableRef '(' args=expressionList? ')' ('.' functionCall)*
-//    | THIS '(' expressionList? ')'  // this()
-//    | SUPER '(' expressionList? ')' // super call
+    : functionCallName arguments  ('.' functionCall)*
+    ;
+
+arguments
+    : '(' expressionList? ')'
     ;
 
 expressionList
     : expression (',' expression)*
+    ;
+
+functionCallName
+    : IDENTIFIER ('.' IDENTIFIER)*
+    | THIS ('.' IDENTIFIER)*  // this
+    | SUPER ('.' IDENTIFIER)+  // super
     ;
 
 variableRef
@@ -233,11 +298,32 @@ typeList
 
 variableType
     : (classOrInterfaceType | primitiveType) ('[' ']')*
-//    |
+    ;
+
+creator
+    :   createdName classCreatorRest
+    |   createdName (arrayCreatorRest | classCreatorRest)
+    ;
+
+createdName
+    :   classOrInterfaceType
+    |   primitiveType
+    ;
+
+classCreatorRest
+    : arguments classBody?
+    ;
+
+// support object array
+arrayCreatorRest
+    :   '['
+        (   ']' ('[' ']')* arrayInitializer
+        |   expression ']' ('[' expression ']')* ('[' ']')*
+        )
     ;
 
 classOrInterfaceType
-    : IDENTIFIER ('.' IDENTIFIER)*
+    :   IDENTIFIER typeArguments? ('.' IDENTIFIER typeArguments? )*
     ;
 
 typeOrVoid
