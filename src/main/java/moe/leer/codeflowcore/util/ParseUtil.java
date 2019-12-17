@@ -53,11 +53,14 @@ public class ParseUtil {
   public static int getFunctionArgsSize(CodeFlowParser.FunctionCallContext context) {
     if (context.functionCall().size() != 0) {
       CodeFlowParser.ArgumentsContext lastCallArgs = context.functionCall().get(context.functionCall().size() - 1).arguments();
-      if (lastCallArgs.expressionList() != null) {
-        return lastCallArgs.expressionList().expression().size();
+      return lastCallArgs.expressionList().expression().size();
+    } else {
+      if (context.arguments().expressionList() != null) {
+        return context.arguments().expressionList().expression().size();
+      } else {
+        return 0;
       }
     }
-    return 0;
   }
 
   /**
@@ -96,6 +99,7 @@ public class ParseUtil {
 
   public static String getFunctionFullName2(CodeFlowParser.FunctionCallContext context) {
     String name;
+    // use last function call name
     if (context.functionCall().size() != 0) {
       String lastCallArgs = ANTLRUtil.getTextFromInputStream(context.functionCall().get(context.functionCall().size() - 1).arguments());
       name = ANTLRUtil.getTextFromInputStream(context);

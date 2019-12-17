@@ -13,5 +13,6 @@ public enum FlowchartFragmentType {
   GOTO, // break, continue, goto
   END,// return
   SEQUENCE, // normal sequential statements
-  FUNCTION
+  FUNCTION,
+  FUNCTION_CALL
 }

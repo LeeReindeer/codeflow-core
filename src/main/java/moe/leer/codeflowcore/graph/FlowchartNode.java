@@ -8,6 +8,7 @@ import guru.nidi.graphviz.model.*;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 
 import static guru.nidi.graphviz.model.Factory.mutNode;
 import static java.util.Arrays.asList;
@@ -260,5 +261,19 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
   public FlowchartNode setType(FlowchartNodeType type) {
     this.type = type;
     return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof FlowchartNode)) return false;
+    FlowchartNode node1 = (FlowchartNode) o;
+    return node.equals(node1.node) &&
+        type == node1.type;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(node, type);
   }
 }

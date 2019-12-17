@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
@@ -42,6 +43,10 @@ public class FlowchartFragment {
     return new FlowchartFragment(start, asArrayList(end), type);
   }
 
+  public static FlowchartFragment create(EnumSet<FlowchartFragmentType> types, FlowchartNode start, FlowchartNode... end) {
+    return new FlowchartFragment(start, asArrayList(end), types);
+  }
+
   public static FlowchartFragment create(FlowchartFragmentType type, FlowchartNode start, List<FlowchartNode> ends) {
     return new FlowchartFragment(start, ends, type);
   }
@@ -52,12 +57,38 @@ public class FlowchartFragment {
   }
 
   public FlowchartFragment(FlowchartNode start, List<FlowchartNode> stops, FlowchartFragmentType type) {
-    this.type = type;
+    this.types = EnumSet.of(type);
     this.start = start;
     this.stops = stops;
   }
 
-  private FlowchartFragmentType type;
+  public FlowchartFragment(FlowchartNode start, List<FlowchartNode> stops, EnumSet<FlowchartFragmentType> type) {
+    this.types = type;
+    this.start = start;
+    this.stops = stops;
+  }
+
+  /**
+   * A fragment may contains more than one type
+   * <p>
+   * Examples:
+   * "return a();" -> return type and function call
+   * <p>
+   * "if (isOk()) {}" IF type and function call
+   */
+  private EnumSet<FlowchartFragmentType> types;
+
+  public boolean isMatchType(FlowchartFragmentType type) {
+    return types.contains(type);
+  }
+
+  public void setType(FlowchartFragmentType type) {
+    this.types = EnumSet.of(type);
+  }
+
+  public void addType(FlowchartFragmentType type) {
+    this.types.add(type);
+  }
 
   /**
    * root graph or subgraph
@@ -90,7 +121,7 @@ public class FlowchartFragment {
    */
   public void link(FlowchartFragment other) {
     for (FlowchartNode stop : this.stops) {
-      if (this.getType() == FlowchartFragmentType.DO_WHILE) { // special port compass for "do while" loop
+      if (this.isMatchType(FlowchartFragmentType.DO_WHILE)) { // special port compass for "do while" loop
         stop.addLink(
             compassLink(stop, Compass.SOUTH, other.start).with(Flowchart.falseLable())
         );

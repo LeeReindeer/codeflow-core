@@ -1,7 +1,9 @@
 package moe.leer.codeflowcore.graph;
 
+import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
+import guru.nidi.graphviz.attribute.Style;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import moe.leer.codeflowcore.util.ANTLRUtil;
@@ -70,6 +72,15 @@ public class Flowchart {
     return processNode(process);
   }
 
+  public static FlowchartNode functionCallNode(String exp, FlowchartNodeType type) {
+    return uniqueFcNode(exp, type)
+        .add(getShape(type), Color.LIGHTBLUE, Style.FILLED);
+  }
+
+  public static FlowchartNode functionCallNode(ParserRuleContext context, FlowchartNodeType type) {
+    return functionCallNode(ANTLRUtil.getTextFromInputStream(context), type);
+  }
+
   /**
    * Create a UNIQUE node in <code>FlowchartType.DECISION</code> type even if <code>process</code> text is same.
    */
@@ -90,4 +101,13 @@ public class Flowchart {
   public static Label falseLable() {
     return Label.of("false");
   }
+
+  public static Shape getShape(FlowchartNodeType type) {
+    return switch (type) {
+      case START, END -> Shape.ELLIPSE; // default shape
+      case PROCESS -> Shape.RECTANGLE;
+      case DECISION -> Shape.DIAMOND;
+    };
+  }
+
 }
