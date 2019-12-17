@@ -18,6 +18,7 @@ public abstract class BaseScope implements Scope {
   // symbol name -> symbol
   public final Map<String, VariableSymbol> symbols = new LinkedHashMap<>(8);
 
+  // function name(contains args infos) -> function
   public final Map<String, FunctionSymbol> functionSymbols = new LinkedHashMap<>(8);
 
   public BaseScope(Scope parentScope) {

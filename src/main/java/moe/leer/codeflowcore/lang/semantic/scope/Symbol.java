@@ -1,21 +1,23 @@
 package moe.leer.codeflowcore.lang.semantic.scope;
 
+import lombok.Data;
 import moe.leer.codeflowcore.lang.parser.CodeFlowLexer;
 
 /**
  * @author leer
  * Created at 12/16/19 9:07 AM
  */
+@Data
 public class Symbol {
-  String name;
+  final String name;
 
-  String text;
+  final String text;
   /**
    * type define in lexer
    *
    * @see CodeFlowLexer#VOID
    */
-  String type;
+  final String type;
   // this symbol's scope
   Scope scope;
 
@@ -23,18 +25,6 @@ public class Symbol {
     this.name = name;
     this.text = text;
     this.type = type;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getText() {
-    return text;
-  }
-
-  public String getType() {
-    return type;
   }
 
   @Override
