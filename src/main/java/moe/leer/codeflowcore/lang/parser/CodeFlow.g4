@@ -7,6 +7,10 @@ import CommonLexer;
 package moe.leer.codeflowcore.lang.parser;
 }
 
+@parser::members {
+ public static boolean supportClass;
+}
+
 // support toplevel function, toplevel statement
 program
     : packageDeclaration? importDeclaration* declaration*
@@ -29,14 +33,14 @@ importDeclaration
     ;
 
 declaration
-    : classOrInterfacemodifiers classDeclaration
+    : {supportClass}? classDeclaration
     | topLevelFunctions
     | topLevelStmts
     | ';'
     ;
 
 classDeclaration
-    :   CLASS IDENTIFIER typeArguments? (EXTENDS variableType)?
+    :   classOrInterfacemodifiers CLASS IDENTIFIER typeArguments? (EXTENDS variableType)?
         (IMPLEMENTS typeList)?
         classBody
     ;
