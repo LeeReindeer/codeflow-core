@@ -5,6 +5,7 @@ package moe.leer.codeflowcore;
  * Created at 12/6/19 6:50 PM
  */
 public class Example {
+  /*
   public static String testIfExample1() {
     return """
               if (prev != null) {
@@ -58,16 +59,7 @@ public class Example {
             c++;
             """;
   }
-
-  /**
-   * if (a == 1) {
-   * a++;
-   * } else {
-   * if (a == 2) {
-   * a--
-   * }
-   * }
-   */
+/*
   public static String testIfElseCode() {
     return
         """
@@ -79,7 +71,6 @@ public class Example {
             c++;
             """;
   }
-
   public static String testIfElseElseCode() {
     return
         """
@@ -93,6 +84,6 @@ public class Example {
             c++;
             """;
   }
-
+  */
 
 }

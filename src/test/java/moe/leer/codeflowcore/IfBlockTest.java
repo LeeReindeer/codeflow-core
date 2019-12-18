@@ -14,31 +14,31 @@ public class IfBlockTest extends BaseFlowchartTest {
 
   @Test
   public void testSimpleIf() throws IOException {
-    codeFlow.parse(Example::testIfCode).toFile("simpleIf.png");
+    codeFlow.parseFile("ifCode.cf").toFile("simpleIf.png");
   }
 
   @Test
   public void testNestedIf() throws IOException {
-    codeFlow.parse(Example::testNestedIfCode).toFile("nestedIf");
+    codeFlow.parseFile("nestedIf.cf").toFile("nestedIf");
   }
 
   @Test
   public void testIfAndElse() throws IOException {
-    codeFlow.parse(Example::testIfAndElseCode).toFile("ifAndElse");
+    codeFlow.parseFile("ifAndElse.cf").toFile("ifAndElse");
   }
 
   @Test
-  public void testIfIfElse() throws IOException {
-    codeFlow.parse(Example::testIfElseCode).toFile("ifIfElse");
+  public void testIfElseIf() throws IOException {
+    codeFlow.parseFile("ifElseIf.cf").toFile("ifIfElse");
   }
 
   @Test
-  public void testIfIfElseElse() throws IOException {
-    codeFlow.parse(Example::testIfElseElseCode).toFile("ifIfElseElse");
+  public void testIfElseIfElse() throws IOException {
+    codeFlow.parseFile("ifElseIfElse.cf").toFile("ifIfElseElse");
   }
 
   @Test
   public void testIfExample() throws IOException {
-    codeFlow.parse(Example::testIfExample1).toFile("IfExample1");
+    codeFlow.parseFile("ifExample1.cf").toFile("IfExample1");
   }
 }

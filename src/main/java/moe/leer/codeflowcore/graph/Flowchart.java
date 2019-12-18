@@ -103,11 +103,17 @@ public class Flowchart {
   }
 
   public static Shape getShape(FlowchartNodeType type) {
-    return switch (type) {
-      case START, END -> Shape.ELLIPSE; // default shape
-      case PROCESS -> Shape.RECTANGLE;
-      case DECISION -> Shape.DIAMOND;
-    };
+    switch (type) {
+      case START:
+      case END:
+        return Shape.ELLIPSE; // default shape
+      case PROCESS:
+        return Shape.RECTANGLE;
+      case DECISION:
+        return Shape.DIAMOND;
+      default:
+        return Shape.ELLIPSE;
+    }
   }
 
 }

@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
+    <groupId>moe.leer</groupId>
     <artifactId>codeflow-core</artifactId>
     <version>1.0-SNAPSHOT</version>
 
 
     <properties>
-        <java.version>13</java.version>
+        <java.version>8</java.version>
         <lombok.version>1.18.10</lombok.version>
     </properties>
 
@@ -69,6 +69,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
