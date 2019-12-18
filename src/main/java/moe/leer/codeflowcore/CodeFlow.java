@@ -38,8 +38,6 @@ public class CodeFlow {
   private CodeFlowLexer lexer = new CodeFlowLexer(null);
   private CodeFlowParser parser;
 
-  //  private String code;
-//  private File codeFile;
   private boolean supportClass;
   private String functionColor = "lightblue";
 
@@ -51,46 +49,6 @@ public class CodeFlow {
   private String outDir = "./";
   private Format format = Format.PNG;
   private File outFile;
-
-  /*
-  public CodeFlow(boolean supportClass, String baseDir) {
-    this.supportClass = supportClass;
-    this.workDir = baseDir;
-  }
-
-  public CodeFlow(String code) {
-    lexer = new CodeFlowLexer(CharStreams.fromString(code));
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-    parser = new CodeFlowParser(tokens);
-    CodeFlowParser.supportClass = false;
-    ParseTree ast = parser.program();
-
-//    semanticCheck(ast);
-
-    FlowchartGenVisitor visitor = new FlowchartGenVisitor();
-    FlowchartFragment flowChart = visitor.visit(ast);
-
-    ParseTreeWalker walker = new ParseTreeWalker();
-    SymbolDefListener symbolDefListener = new SymbolDefListener();
-
-    walker.walk(symbolDefListener, ast);
-
-    FlowchartConnector connector = new FlowchartConnector(visitor.functionCallNodes, visitor.subFragments);
-    connector.connect(flowChart.getGraph());
-
-//    visitor.visit(ast);
-//    MutableGraph g = mutGraph().setDirected(true);
-//        .add(flowChartFragment.getStart().node);
-//    g.graphAttrs().add("splines", "polyline");
-
-//    for (FlowchartFragment subFragment : visitor.getSubFragments().values()) {
-//      if (subFragment.getGraph() != null) {
-//        subFragment.getGraph().addTo(g);
-//      }
-//    }
-    graphviz = Graphviz.fromGraph(flowChart.getGraph());
-  }
-   */
 
   public CodeFlow parse(Supplier<String> supplier) {
     return parse(supplier.get());
@@ -189,25 +147,4 @@ public class CodeFlow {
   public static CodeFlow build() {
     return CodeFlow.builder().build();
   }
-
-  /*
-  public static void genFlowchartPNG(String fileNameWithoutSuffix, Supplier<String> codeSupplier) throws IOException {
-    CodeFlow.fromString(codeSupplier.get())
-        .graphviz.height(800).width(600).render(Format.PNG).toFile(new File(fileNameWithoutSuffix + ".png"));
-  }
-
-  public static void genFlowchartPNGFromFile(String inputFile) throws IOException {
-    int dotIndex = inputFile.indexOf('.');
-    String fileNameWithoutSuffix = inputFile.substring(0, dotIndex == -1 ? inputFile.length() : dotIndex);
-    genFlowchartPNGFromFile(inputFile, fileNameWithoutSuffix);
-  }
-
-  public static void genFlowchartPNGFromFile(String inputFile, String outputFile) throws IOException {
-    inputFile = "examples/" + inputFile;
-    CodeFlow.fromFile(new File(inputFile))
-//    ;
-        .graphviz.height(800).width(600).render(Format.PNG).toFile(new File(outputFile + ".png"));
-  }
-   */
-
 }
