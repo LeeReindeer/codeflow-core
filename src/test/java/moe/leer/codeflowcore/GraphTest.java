@@ -1,16 +1,17 @@
 package moe.leer.codeflowcore;
 
 import guru.nidi.graphviz.attribute.Color;
+import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.attribute.Shape;
 import guru.nidi.graphviz.attribute.Style;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.model.LinkSource;
-import guru.nidi.graphviz.model.LinkTarget;
-import guru.nidi.graphviz.model.MutableGraph;
-import guru.nidi.graphviz.model.MutableNode;
+import guru.nidi.graphviz.model.*;
 import guru.nidi.graphviz.parse.Parser;
 import moe.leer.codeflowcore.graph.Flowchart;
 import moe.leer.codeflowcore.graph.FlowchartNode;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,20 +23,21 @@ import static guru.nidi.graphviz.model.Factory.mutNode;
  * @author leer
  * Created at 12/6/19 3:37 PM
  */
-public class TestGraph {
+public class GraphTest {
 
-  public static void main(String[] args) throws IOException{
-    testSubFlowchart();
-  }
-
-  public static void testParseDotFile() throws IOException {
+  @Test
+  public void testParseDotFile() throws IOException {
     Parser parser = new Parser();
     MutableGraph g1 = parser.read(new File("t.dot"));
-    Graphviz.fromGraph(g1).render(Format.PNG).toFile(new File("t3.png"));
-    Graphviz.fromGraph(g1).render(Format.DOT).toFile(new File("t3.dot"));
+
+    Assert.assertNotNull(g1);
+
+    Graphviz.fromGraph(g1).render(Format.PNG).toFile(new File("./t3.png"));
+    Graphviz.fromGraph(g1).render(Format.DOT).toFile(new File("./t3.dot"));
   }
 
-  public static void testLinkSubGraph() throws IOException {
+  @Test
+  public void testLinkSubGraph() throws IOException {
     MutableNode a0 = mutNode("a0");
     MutableNode a1 = mutNode("a1");
     MutableNode b0 = mutNode("b0");
@@ -59,7 +61,8 @@ public class TestGraph {
   /**
    * sub graph must has a name start with "cluster"
    */
-  public static void testSubFlowchart() throws IOException {
+  @Test
+  public void testSubFlowchart() throws IOException {
     FlowchartNode nodeA = Flowchart.startNode();
     FlowchartNode nodeB = Flowchart.processNode("b").add(Color.LIGHTBLUE, Style.FILLED);
     FlowchartNode end1 = Flowchart.endNode();
@@ -72,18 +75,43 @@ public class TestGraph {
     nodeC.addLink(nodeD);
     nodeD.addLink(end2);
 
-
     MutableGraph sub1 = mutGraph("cluster_ab").setDirected(true).add(nodeA).setCluster(true);
     MutableGraph sub2 = mutGraph("cluster_cd").setDirected(true).add(nodeC).setCluster(true);
     MutableGraph g = mutGraph().setDirected(true).add(sub1, sub2);
+    sub1.graphAttrs().add(Label.of("function ab"));
+    sub2.graphAttrs().add(Label.of("function cd"));
 
-    LinkSource from = nodeB.isolateCopy();
-    LinkSource to = nodeC.isolateCopy();
-    from.links().add(from.linkTo((LinkTarget) to));
-    g.add(from);
+    linkNode2SubGraph(nodeB, nodeC, g);
+
+    FlowchartNode start = Flowchart.startNode();
+    FlowchartNode outCall = Flowchart.processNode("ab();");
+    start.addLink(outCall);
+    g.add(start);
+    linkNode2SubGraph(outCall, nodeA, g);
 
     Graphviz.fromGraph(g).width(200).render(Format.PNG).toFile(new File("subGraph.png"));
     Graphviz.fromGraph(g).width(200).render(Format.DOT).toFile(new File("subGraph.dot"));
+  }
+
+  public static void linkNode2SubGraph(FlowchartNode source, FlowchartNode targetInSub, MutableGraph rootGraph) {
+    LinkSource from = source.isolateCopy();
+    LinkTarget to = targetInSub.isolateCopy();
+    from.links().add(from.linkTo(to).add(Style.DASHED));
+    rootGraph.add(from);
+  }
+
+  @Test
+  public void testPort() throws IOException {
+    MutableNode init = mutNode("int a = 1");
+    MutableNode node = mutNode("a < 1").add(Shape.DIAMOND);
+    MutableNode end = mutNode("end");
+    init.addLink(node);
+    node.links().add(node.port(Compass.EAST).linkTo(end));
+    MutableGraph g = mutGraph().setDirected(true).add(init);
+    g.graphAttrs().add("splines", "false");
+
+    Graphviz.fromGraph(g).render(Format.PNG).toFile(new File("port.png"));
+    Graphviz.fromGraph(g).render(Format.DOT).toFile(new File("port.dot"));
   }
 
   /*
