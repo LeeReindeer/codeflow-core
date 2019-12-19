@@ -115,11 +115,7 @@ int binarySearch(int[] a, int k) {
         return mid;
       }
     }
-    return rst();
-}
-
-int rst() {
-  return -1;
+    return -1;
 }
 ```
 
