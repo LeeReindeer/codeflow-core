@@ -137,6 +137,6 @@ See more example at [examples folder](examples/).
     - The single flowchart fragment is built directly
     - The complex flowchart fragment(like nested conditions and loops) is built recursively
 
-- Use [graphviz-java](https://github.com/nidi3/graphviz-java) library convert node data structure to [dot](https://en.wikipedia.org/wiki/DOT_(graph_description_language) file.
+- Use [graphviz-java](https://github.com/nidi3/graphviz-java) library convert node data structure to [dot](https://en.wikipedia.org/wiki/DOT_\(graph_description_language\)) file.
 
 - Finally, use [Graphviz](https://www.graphviz.org/) to convert dot file to graph image.
