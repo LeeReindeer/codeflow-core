@@ -1,0 +1,12 @@
+void a() {
+int va = 1;
+}
+
+class A {
+  void a() {
+    A a = new A();
+    a.b();
+  }
+  void b() {
+  }
+}

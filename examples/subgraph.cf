@@ -1,0 +1,11 @@
+int a = fact(10);
+
+void main() {
+  int a = fact(10);
+}
+
+static int fact(int n) {
+  println(n);
+  if (n==0) return 1;
+  return n * fact(n-1);
+}

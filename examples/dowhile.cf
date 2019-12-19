@@ -1,0 +1,5 @@
+do {
+  a++;
+  b++;
+} while (a < 10);
+println(a);

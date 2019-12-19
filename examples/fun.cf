@@ -1,0 +1,30 @@
+public static void main(String[] args) {
+ fact(10);
+ a();
+}
+
+static void a() {
+  int x = b();
+  c();
+  d();
+}
+
+static void b() {
+  c();
+}
+
+static void c() {
+  b();
+}
+
+static void d() {
+}
+
+static void e() {
+}
+
+static int fact(int n) {
+  println(n);
+  if (n==0) return 1;
+  return n * fact(n-1);
+}

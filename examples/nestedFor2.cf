@@ -1,0 +1,10 @@
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < size; j++) {
+        if (unionUF.connected(xyTo1D(point.x, point.y), xyTo1D(i, j))) {
+          Point p = new Point(i, j);
+          setBlankBox(p);
+          showNumberAroundBlank(i, j);
+          clearFlag(p);
+        }
+      }
+    }
