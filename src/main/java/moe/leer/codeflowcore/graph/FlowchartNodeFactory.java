@@ -1,5 +1,6 @@
 package moe.leer.codeflowcore.graph;
 
+import guru.nidi.graphviz.attribute.Font;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.Compass;
 import guru.nidi.graphviz.model.Link;
@@ -23,11 +24,11 @@ public class FlowchartNodeFactory {
   }
 
   public static FlowchartNode fcNode(String name, FlowchartNodeType type) {
-    return new FlowchartNode(mutNode(name, false).add(Label.of(name))).setType(type);
+    return modifyFontSize(new FlowchartNode(mutNode(name, false).add(Label.of(name))).setType(type), name);
   }
 
   public static FlowchartNode uniqueFcNode(String name, FlowchartNodeType type) {
-    return new FlowchartNode(mutNode(name + randomName(), false).add(Label.of(name))).setType(type);
+    return modifyFontSize(new FlowchartNode(mutNode(name + randomName(), false).add(Label.of(name))).setType(type), name);
   }
 
   public static FlowchartNode fcNode(FlowchartNodeType type) {
@@ -58,6 +59,16 @@ public class FlowchartNodeFactory {
    * source:sourceCompass -> target
    */
   public static Link compassLink(FlowchartNode source, Compass sourceCompass, FlowchartNode target) {
-    return source.port(sourceCompass).linkTo(target.port(Compass.CENTER));
+    return source.port(sourceCompass).linkTo(target.node);
+  }
+
+  // default font size is 14
+  private static FlowchartNode modifyFontSize(FlowchartNode node, String text) {
+    if (text.length() >= 30 && text.length() < 40) {
+      node.add(Font.size(12));
+    } else if (text.length() >= 40) {
+      node.add(Font.size(10));
+    }
+    return node;
   }
 }

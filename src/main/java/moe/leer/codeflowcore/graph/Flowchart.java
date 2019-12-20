@@ -1,9 +1,6 @@
 package moe.leer.codeflowcore.graph;
 
-import guru.nidi.graphviz.attribute.Color;
-import guru.nidi.graphviz.attribute.Label;
-import guru.nidi.graphviz.attribute.Shape;
-import guru.nidi.graphviz.attribute.Style;
+import guru.nidi.graphviz.attribute.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import moe.leer.codeflowcore.util.ANTLRUtil;
@@ -85,8 +82,15 @@ public class Flowchart {
    * Create a UNIQUE node in <code>FlowchartType.DECISION</code> type even if <code>process</code> text is same.
    */
   public static FlowchartNode decisionNode(String decision) {
-    return uniqueFcNode(decision, FlowchartNodeType.DECISION)
+    // special font size for decision node
+    FlowchartNode node  = uniqueFcNode(decision, FlowchartNodeType.DECISION)
         .add(Shape.DIAMOND);
+    if (decision.length() >= 10 && decision.length() <= 20) {
+      node.add(Font.size(12));
+    } else if (decision.length() > 20){
+      node.add(Font.size(8));
+    }
+    return node;
   }
 
   public static FlowchartNode decisionNode(ParserRuleContext ctx) {
