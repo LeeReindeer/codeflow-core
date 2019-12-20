@@ -3,9 +3,11 @@ package moe.leer.codeflowcore.graph;
 import guru.nidi.graphviz.attribute.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import moe.leer.codeflowcore.FlowchartConfig;
 import moe.leer.codeflowcore.util.ANTLRUtil;
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import static guru.nidi.graphviz.model.Factory.mutNode;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.fcNode;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.uniqueFcNode;
 
@@ -71,7 +73,7 @@ public class Flowchart {
 
   public static FlowchartNode functionCallNode(String exp, FlowchartNodeType type) {
     return uniqueFcNode(exp, type)
-        .add(getShape(type), Color.LIGHTBLUE, Style.FILLED);
+        .add(getShape(type), Color.named(FlowchartConfig.functionColor), Style.FILLED);
   }
 
   public static FlowchartNode functionCallNode(ParserRuleContext context, FlowchartNodeType type) {
@@ -83,12 +85,12 @@ public class Flowchart {
    */
   public static FlowchartNode decisionNode(String decision) {
     // special font size for decision node
-    FlowchartNode node  = uniqueFcNode(decision, FlowchartNodeType.DECISION)
+    FlowchartNode node = uniqueFcNode(decision, FlowchartNodeType.DECISION)
         .add(Shape.DIAMOND);
     if (decision.length() >= 10 && decision.length() <= 20) {
       node.add(Font.size(12));
-    } else if (decision.length() > 20){
-      node.add(Font.size(8));
+    } else if (decision.length() > 20) {
+      node.add(Font.size(10));
     }
     return node;
   }
@@ -96,6 +98,24 @@ public class Flowchart {
   public static FlowchartNode decisionNode(ParserRuleContext ctx) {
     String decision = ANTLRUtil.getTextFromInputStream(ctx);
     return decisionNode(decision);
+  }
+
+  public static FlowchartNode breakNode(String label) {
+//    return uniqueFcNode("break " + label, FlowchartNodeType.PROCESS).add(Shape.NONE);
+    FlowchartNode node = new BreakFlowchartNode(
+        mutNode("break-" + label + FlowchartNodeFactory.randomName())
+            .add(Label.of("break " + label), Shape.NONE),
+        label);
+    return node;
+  }
+
+  public static FlowchartNode continueNode(String label) {
+//    return uniqueFcNode("continue " + label, FlowchartNodeType.PROCESS).add(Shape.NONE);
+    FlowchartNode node = new ContinueFlowchartNode(
+        mutNode("continue-" + label + FlowchartNodeFactory.randomName())
+            .add(Label.of("continue " + label), Shape.NONE),
+        label);
+    return node;
   }
 
   public static Label trueLabel() {

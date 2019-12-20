@@ -16,4 +16,8 @@ public class SomeUtil {
   public static <T> ArrayList<T> asArrayList(T... array) {
     return new ArrayList<>(asList(array));
   }
+
+  public static <T> ArrayList<T> emptyArrayList() {
+    return new ArrayList<>(4);
+  }
 }

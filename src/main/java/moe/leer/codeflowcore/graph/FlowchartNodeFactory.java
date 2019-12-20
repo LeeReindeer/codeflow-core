@@ -18,7 +18,7 @@ public class FlowchartNodeFactory {
 
   public static long nodeCount;
 
-  private static String randomName() {
+  public static String randomName() {
     if (nodeCount == Long.MAX_VALUE) nodeCount = 0;
     return "-" + nodeCount++ + RandomStringUtils.randomAlphabetic(1);
   }

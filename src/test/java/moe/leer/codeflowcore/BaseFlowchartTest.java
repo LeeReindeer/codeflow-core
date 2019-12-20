@@ -2,7 +2,6 @@ package moe.leer.codeflowcore;
 
 import guru.nidi.graphviz.engine.Format;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  * @author leer
@@ -13,6 +12,8 @@ public abstract class BaseFlowchartTest {
 
   @BeforeClass
   public void before() {
+    FlowchartConfig.setFunctionColor("pink");
+//    FlowchartConfig.setDecisionCompass("s", "w");
     codeFlow = CodeFlow.builder()
         .workDir("examples")
         .outDir("tests")

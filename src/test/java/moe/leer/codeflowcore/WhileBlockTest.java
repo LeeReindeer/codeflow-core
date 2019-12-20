@@ -18,4 +18,14 @@ public class WhileBlockTest extends BaseFlowchartTest {
   public void testDoWhile() throws IOException {
     codeFlow.parseFile("dowhile.cf").toFile("dowhile");
   }
+
+  @Test
+  public void testWhileBreak() throws IOException {
+    codeFlow.parseFile("twoSumSorted.cf").toFile("whileBreak");
+  }
+
+  @Test
+  public void testDoWhileBreak() throws IOException {
+    codeFlow.parseFile("dowhileBreak.cf").toFile("dowhileBreak");
+  }
 }

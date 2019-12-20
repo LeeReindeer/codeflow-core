@@ -6,10 +6,10 @@ import guru.nidi.graphviz.model.MutableGraph;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moe.leer.codeflowcore.FlowchartConfig;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
@@ -95,6 +95,26 @@ public class FlowchartFragment {
    */
   private MutableGraph graph;
 
+
+  private Set<BreakFlowchartNode> breakNodes = new HashSet<>(4);
+  private Set<ContinueFlowchartNode> continueNodes = new HashSet<>(4);
+
+  public void addBreakNode(BreakFlowchartNode node) {
+    breakNodes.add(node);
+  }
+
+  public void addBreakNodes(Collection<BreakFlowchartNode> nodes) {
+    breakNodes.addAll(nodes);
+  }
+
+  public void addContinueNode(ContinueFlowchartNode node) {
+    continueNodes.add(node);
+  }
+
+  public void addContinueNodes(Collection<ContinueFlowchartNode> nodes) {
+    continueNodes.addAll(nodes);
+  }
+
   /**
    * A start node can also be a stop node, like decision node
    */
@@ -121,10 +141,18 @@ public class FlowchartFragment {
    */
   public void link(FlowchartFragment other) {
     for (FlowchartNode stop : this.stops) {
-      if (this.isMatchType(FlowchartFragmentType.DO_WHILE)) { // special port compass for "do while" loop
-        stop.addLink(
-            compassLink(stop, Compass.SOUTH, other.start).with(Flowchart.falseLable())
-        );
+      if (this.isMatchType(FlowchartFragmentType.DO_WHILE) &&
+          stop.getType() == FlowchartNodeType.DECISION &&
+          stop.isLinkable()) { // special port compass for "do while" loop
+        if (StringUtils.isNotBlank(FlowchartConfig.doWhileDecisionFalseCompass)) {
+          stop.addLink(
+              compassLink(stop, Compass.of(FlowchartConfig.doWhileDecisionFalseCompass).get(), other.start).with(Flowchart.falseLable())
+          );
+        } else {
+          stop.addLink(
+              to(other.start).with(Flowchart.falseLable())
+          );
+        }
       } else if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
         stop.addFalseConditionLink(other.start);
       } else {
@@ -160,15 +188,16 @@ public class FlowchartFragment {
   }
 
   public void linkNode2Stop(FlowchartNode newStop) {
-    for (FlowchartNode stop : stops) {
-      stop.addLink(newStop);
-    }
-    this.stops = asArrayList(newStop);
+//    for (FlowchartNode stop : stops) {
+//      stop.addLink(newStop);
+//    }
+//    this.stops = asArrayList(newStop);
+    link(FlowchartFragment.create(newStop, newStop));
   }
 
   public void linkDecisionNodeAsStop(FlowchartNode decisionNode) {
     for (FlowchartNode stop : stops) {
-      stop.addLink(Compass.EAST, decisionNode, Compass.EAST);
+      stop.addLink(decisionNode);
     }
     this.stops = asArrayList(decisionNode);
   }

@@ -5,6 +5,8 @@ import guru.nidi.graphviz.attribute.ForNode;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.MapAttributes;
 import guru.nidi.graphviz.model.*;
+import moe.leer.codeflowcore.FlowchartConfig;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -14,6 +16,7 @@ import static guru.nidi.graphviz.model.Factory.mutNode;
 import static java.util.Arrays.asList;
 import static moe.leer.codeflowcore.TodoException.TODO;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
+import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
 
 /**
  * Proxy of <code>MutableNode</code>
@@ -24,7 +27,7 @@ import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>, LinkSource, LinkTarget {
 
   public final MutableNode node;
-  private FlowchartNodeType type;
+  protected FlowchartNodeType type;
 
   public FlowchartNode(MutableNode node) {
     this.node = node;
@@ -153,7 +156,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     if (this.isLinkable()) {
       links().add(linkTo(target));
     } else {
-      throw new IllegalStateException("failed to link " + target + ", when node's out-degree is " + this.links().size());
+      throw new IllegalStateException(this + " failed to link " + target + ",\nwhen node's out-degree is " + this.links().size());
     }
     return this;
   }
@@ -162,7 +165,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     if (this.isLinkable()) {
       links().add(linkTo(target).with(label));
     } else {
-      throw new IllegalStateException("failed to link " + target + ", when node's out-degree is " + this.links().size());
+      throw new IllegalStateException(this + " failed to link " + target + ",\nwhen node's out-degree is " + this.links().size());
     }
     return this;
   }
@@ -196,9 +199,15 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
 
   public FlowchartNode addTrueConditionLink(FlowchartNode target, String trueCondition) {
     if (type == FlowchartNodeType.DECISION) {
-      addLink(
-          compassLink(this, Compass.SOUTH, target).with(Label.of(trueCondition))
-      );
+      if (StringUtils.isNotBlank(FlowchartConfig.decisionTrueCompass)) {
+        addLink(
+            compassLink(this, Compass.of(FlowchartConfig.decisionTrueCompass).get(), target).with(Label.of(trueCondition))
+        );
+      } else {
+        addLink(
+            to(target).with(Label.of(trueCondition))
+        );
+      }
     } else {
       throw new IllegalStateException(this + " is not a decision node");
     }
@@ -215,9 +224,15 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
 
   public FlowchartNode addFalseConditionLink(FlowchartNode target, String falseCondition) {
     if (type == FlowchartNodeType.DECISION) {
-      addLink(
-          compassLink(this, Compass.WEST, target).with(Label.of(falseCondition))
-      );
+      if (StringUtils.isNotBlank(FlowchartConfig.decisionFalseCompass)) {
+        addLink(
+            compassLink(this, Compass.of(FlowchartConfig.decisionFalseCompass).get(), target).with(Label.of(falseCondition))
+        );
+      } else {
+        addLink(
+            to(target).with(Label.of(falseCondition))
+        );
+      }
     } else {
       throw new IllegalStateException(this + " is not a decision node");
     }

@@ -1,0 +1,6 @@
+do {
+  a++;
+  if (a == 5) break;
+  b++;
+} while (a < 10);
+println(a);
