@@ -39,7 +39,9 @@ public class CodeFlow {
   private CodeFlowParser parser;
 
   private boolean supportClass;
-  private String functionColor = "lightblue";
+
+  private Integer height;
+  private Integer width;
 
   @Getter
   @Setter
@@ -82,6 +84,12 @@ public class CodeFlow {
       FlowchartConnector connector = new FlowchartConnector(visitor.functionCallNodes, visitor.subFragments);
       connector.connect(flowChart.getGraph());
       graphviz = Graphviz.fromGraph(flowChart.getGraph());
+      if (height != null) {
+        graphviz = graphviz.height(height);
+      }
+      if (width != null) {
+        graphviz = graphviz.width(width);
+      }
     }
     return this;
   }
@@ -100,6 +108,26 @@ public class CodeFlow {
 
   public CodeFlow render(Format format) {
     this.format = format;
+    return this;
+  }
+
+  public CodeFlow height(Integer height) {
+    this.height = height;
+    if (graphviz != null) {
+      graphviz = graphviz.height(height);
+    } else {
+      throw new IllegalStateException("Please call CodeFlow#parse first");
+    }
+    return this;
+  }
+
+  public CodeFlow width(Integer width) {
+    this.width = width;
+    if (graphviz != null) {
+      graphviz = graphviz.width(width);
+    } else {
+      throw new IllegalStateException("Please call CodeFlow#parse first");
+    }
     return this;
   }
 
