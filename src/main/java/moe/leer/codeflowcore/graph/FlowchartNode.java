@@ -7,6 +7,7 @@ import guru.nidi.graphviz.attribute.MapAttributes;
 import guru.nidi.graphviz.model.*;
 import moe.leer.codeflowcore.FlowchartConfig;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -29,11 +30,11 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
   public final MutableNode node;
   protected FlowchartNodeType type;
 
-  public FlowchartNode(MutableNode node) {
+  public FlowchartNode(@NotNull MutableNode node) {
     this.node = node;
   }
 
-  public FlowchartNode(MutableNode node, FlowchartNodeType type) {
+  public FlowchartNode(@NotNull MutableNode node, @NotNull FlowchartNodeType type) {
     this.node = node;
     this.type = type;
   }
@@ -57,7 +58,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
   }
 
   @Override
-  public Link linkTo(LinkTarget target) {
+  public Link linkTo(@NotNull LinkTarget target) {
     if (target instanceof FlowchartNode) {
       node.linkTo(((FlowchartNode) target).node); // add raw node
     }
@@ -65,10 +66,11 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
   }
 
   @Override
-  public void addTo(MutableGraph graph) {
+  public void addTo(@NotNull MutableGraph graph) {
     node.addTo(graph);
   }
 
+  @NotNull
   @Override
   public LinkTarget asLinkTarget() {
     return node.asLinkTarget();
@@ -77,33 +79,38 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
   /**
    * @return a link to it self
    */
+  @NotNull
   @Override
   public Link linkTo() {
     return node.linkTo();
   }
 
+  @NotNull
   @Override
   public LinkSource asLinkSource() {
     return node.asLinkSource();
   }
 
+  @NotNull
   @Override
-  public FlowchartNode add(Attributes<? extends ForNode> attributes) {
+  public FlowchartNode add(@NotNull Attributes<? extends ForNode> attributes) {
     node.add(attributes);
     return this;
   }
 
+  @NotNull
   @Override
-  public Attributes<? super ForNode> applyTo(MapAttributes<? super ForNode> attrs) {
+  public Attributes<? super ForNode> applyTo(@NotNull MapAttributes<? super ForNode> attrs) {
     return node.applyTo(attrs);
   }
 
   @Nullable
   @Override
-  public Object get(String key) {
+  public Object get(@NotNull String key) {
     return node.get(key);
   }
 
+  @NotNull
   public MutableNode copy() {
     return mutNode(node.name()).addLink(node.links()).add(node.attrs());
   }
@@ -152,7 +159,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     return this;
   }
 
-  public FlowchartNode addLink(LinkTarget target) {
+  public FlowchartNode addLink(@NotNull LinkTarget target) {
     if (this.isLinkable()) {
       links().add(linkTo(target));
     } else {
@@ -161,7 +168,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     return this;
   }
 
-  public FlowchartNode addLink(LinkTarget target, Label label) {
+  public FlowchartNode addLink(@NotNull LinkTarget target, Label label) {
     if (this.isLinkable()) {
       links().add(linkTo(target).with(label));
     } else {
@@ -188,7 +195,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
   }
 
 
-  public FlowchartNode addLink(Link link) {
+  public FlowchartNode addLink(@NotNull Link link) {
     if (this.isLinkable()) {
       links().add(link);
     } else {
@@ -197,7 +204,7 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     return this;
   }
 
-  public FlowchartNode addTrueConditionLink(FlowchartNode target, String trueCondition) {
+  public FlowchartNode addTrueConditionLink(@NotNull FlowchartNode target, @NotNull String trueCondition) {
     if (type == FlowchartNodeType.DECISION) {
       if (StringUtils.isNotBlank(FlowchartConfig.decisionTrueCompass)) {
         addLink(
@@ -214,15 +221,15 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     return this;
   }
 
-  public FlowchartNode addTrueConditionLink(FlowchartNode target) {
+  public FlowchartNode addTrueConditionLink(@NotNull FlowchartNode target) {
     return addTrueConditionLink(target, "true");
   }
 
-  public FlowchartNode addFalseConditionLink(FlowchartNode target) {
+  public FlowchartNode addFalseConditionLink(@NotNull FlowchartNode target) {
     return addFalseConditionLink(target, "false");
   }
 
-  public FlowchartNode addFalseConditionLink(FlowchartNode target, String falseCondition) {
+  public FlowchartNode addFalseConditionLink(@NotNull FlowchartNode target, @NotNull String falseCondition) {
     if (type == FlowchartNodeType.DECISION) {
       if (StringUtils.isNotBlank(FlowchartConfig.decisionFalseCompass)) {
         addLink(

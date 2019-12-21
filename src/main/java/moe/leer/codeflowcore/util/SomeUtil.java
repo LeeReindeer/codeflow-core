@@ -13,6 +13,7 @@ import static java.util.Arrays.asList;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SomeUtil {
+  @SafeVarargs
   public static <T> ArrayList<T> asArrayList(T... array) {
     return new ArrayList<>(asList(array));
   }

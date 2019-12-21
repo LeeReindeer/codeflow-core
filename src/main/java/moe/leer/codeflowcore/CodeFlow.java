@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -52,11 +53,11 @@ public class CodeFlow {
   private Format format = Format.PNG;
   private File outFile;
 
-  public CodeFlow parse(Supplier<String> supplier) {
+  public CodeFlow parse(@NotNull Supplier<String> supplier) {
     return parse(supplier.get());
   }
 
-  public CodeFlow parse(String code) {
+  public CodeFlow parse(@NotNull String code) {
     if (StringUtils.isNotBlank(code)) {
       // init lexer and parser
       if (lexer == null) {
@@ -94,24 +95,24 @@ public class CodeFlow {
     return this;
   }
 
-  public CodeFlow parse(File file) throws IOException {
+  public CodeFlow parse(@NotNull File file) throws IOException {
     try (final InputStream in = new FileInputStream(getAndCreateDir(workDir) + file.getPath())) {
       return parse(IOUtils.toString(in));
     }
   }
 
-  public CodeFlow parseFile(String path) throws IOException {
+  public CodeFlow parseFile(@NotNull String path) throws IOException {
     try (final InputStream in = new FileInputStream(getAndCreateDir(workDir) + path)) {
       return parse(IOUtils.toString(in));
     }
   }
 
-  public CodeFlow render(Format format) {
+  public CodeFlow render(@NotNull Format format) {
     this.format = format;
     return this;
   }
 
-  public CodeFlow height(Integer height) {
+  public CodeFlow height(@NotNull Integer height) {
     this.height = height;
     if (graphviz != null) {
       graphviz = graphviz.height(height);
@@ -121,7 +122,7 @@ public class CodeFlow {
     return this;
   }
 
-  public CodeFlow width(Integer width) {
+  public CodeFlow width(@NotNull Integer width) {
     this.width = width;
     if (graphviz != null) {
       graphviz = graphviz.width(width);
@@ -131,7 +132,7 @@ public class CodeFlow {
     return this;
   }
 
-  public File toFile(String pathName) throws IOException {
+  public File toFile(@NotNull String pathName) throws IOException {
     this.outFile = new File(getAndCreateDir(outDir) + pathName);
     if (graphviz != null) {
       graphviz.render(this.format).toFile(outFile);
@@ -149,7 +150,8 @@ public class CodeFlow {
     }
   }
 
-  private String getAndCreateDir(String dir) throws IOException {
+  @NotNull
+  private String getAndCreateDir(@NotNull String dir) throws IOException {
     if (!dir.endsWith("/")) {
       dir = dir + "/";
     }
