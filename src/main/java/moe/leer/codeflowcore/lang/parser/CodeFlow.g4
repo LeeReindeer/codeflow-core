@@ -178,12 +178,13 @@ blockStatement
 statement
     : blockStmt=block
     | ifBlock
+    | switchBlock
     | forBlock
     | whileBlock
     | doWhileBlock
     | returnToken=RETURN expression? ';'?
     | breakToken=BREAK IDENTIFIER? ';'?
-    | continueToken=CONTINUE IDENTIFIER';'?
+    | continueToken=CONTINUE IDENTIFIER? ';'?
     | gotoToken=GOTO IDENTIFIER ';'?
     | labelStmt=IDENTIFIER ':' statement // label
     | emptyStmt=SEMI
@@ -197,6 +198,24 @@ statement
 ifBlock
     // fixme else (a == 3)
     : IF parExpression statement (ELSE statement)?
+    ;
+
+// LIMITATION: force default case at the last
+switchBlock
+    : SWITCH parExpression '{'
+      switchCaseGroup*
+      DEFAULT ':' defaultStmt=blockStatements
+    '}'
+    ;
+
+switchCaseGroup
+    : switchCase+ blockStatements
+    ;
+
+switchCase
+    : CASE constantExpression=expression ':'
+    | CASE IDENTIFIER ':'
+//    | DEFAULT ':'
     ;
 
 forBlock

@@ -1,0 +1,16 @@
+int a;
+switch(type) {
+  case DOWHILE:
+    a = 1; // fallthrough
+  case FOR:
+  case WHILE:
+    a = 2;
+    break;
+  case IF:
+    a = 3;
+    break;
+  default:
+    a = 0;
+    break;
+}
+println(a);

@@ -5,6 +5,7 @@ import guru.nidi.graphviz.attribute.ForNode;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.MapAttributes;
 import guru.nidi.graphviz.model.*;
+import lombok.Getter;
 import moe.leer.codeflowcore.FlowchartConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +30,12 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
 
   public final MutableNode node;
   protected FlowchartNodeType type;
+
+  // for condition node
+  @Getter
+  protected Link trueLink;
+  @Getter
+  protected Link falseLink;
 
   public FlowchartNode(@NotNull MutableNode node) {
     this.node = node;
@@ -206,15 +213,18 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
 
   public FlowchartNode addTrueConditionLink(@NotNull FlowchartNode target, @NotNull String trueCondition) {
     if (type == FlowchartNodeType.DECISION) {
+      Link link;
       if (StringUtils.isNotBlank(FlowchartConfig.decisionTrueCompass)) {
-        addLink(
-            compassLink(this, Compass.of(FlowchartConfig.decisionTrueCompass).get(), target).with(Label.of(trueCondition))
-        );
+        link = compassLink(this,
+            Compass.of(FlowchartConfig.decisionTrueCompass).get(),
+            target).
+            with(Label.of(trueCondition));
+        addLink(link);
       } else {
-        addLink(
-            to(target).with(Label.of(trueCondition))
-        );
+        link = to(target).with(Label.of(trueCondition));
+        addLink(link);
       }
+      trueLink = link;
     } else {
       throw new IllegalStateException(this + " is not a decision node");
     }
@@ -231,15 +241,15 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
 
   public FlowchartNode addFalseConditionLink(@NotNull FlowchartNode target, @NotNull String falseCondition) {
     if (type == FlowchartNodeType.DECISION) {
+      Link link;
       if (StringUtils.isNotBlank(FlowchartConfig.decisionFalseCompass)) {
-        addLink(
-            compassLink(this, Compass.of(FlowchartConfig.decisionFalseCompass).get(), target).with(Label.of(falseCondition))
-        );
+        link = compassLink(this, Compass.of(FlowchartConfig.decisionFalseCompass).get(), target).with(Label.of(falseCondition));
+        addLink(link);
       } else {
-        addLink(
-            to(target).with(Label.of(falseCondition))
-        );
+        link = to(target).with(Label.of(falseCondition));
+        addLink(link);
       }
+      falseLink = link;
     } else {
       throw new IllegalStateException(this + " is not a decision node");
     }

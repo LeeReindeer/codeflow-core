@@ -235,6 +235,24 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIfBlock(CodeFlowParser.IfBlockContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#switchBlock}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSwitchBlock(CodeFlowParser.SwitchBlockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#switchCaseGroup}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSwitchCaseGroup(CodeFlowParser.SwitchCaseGroupContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#switchCase}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSwitchCase(CodeFlowParser.SwitchCaseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#forBlock}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

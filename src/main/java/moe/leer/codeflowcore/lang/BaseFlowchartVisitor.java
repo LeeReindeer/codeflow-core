@@ -33,8 +33,8 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
 //  private List<FlowchartNode> functionCallNodes = new ArrayList<>();
   public Map<FlowchartNode, List<String>> functionCallNodes = new HashMap<>(8);
   // breakNode -> label, default label is empty
-  public Set<FlowchartNode> breakNodes = new HashSet<>(8);
-  public Set<FlowchartNode> continueNodes = new HashSet<>(8);
+  public Set<FlowchartNode> allBreakNodes = new HashSet<>(8);
+  public Set<FlowchartNode> allContinueNodes = new HashSet<>(8);
   // label name -> block
   public Map<String, FlowchartFragment> labeledFragments = new HashMap<>(8);
 
@@ -165,7 +165,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       FlowchartFragment breakFragment = FlowchartFragment.create(FlowchartFragmentType.BREAK, breakNode, emptyArrayList());
       breakFragment.addBreakNode((BreakFlowchartNode) breakNode);
 
-      breakNodes.add(breakNode);
+      allBreakNodes.add(breakNode);
       return breakFragment;
     } else if (ctx.continueToken != null) {
       String where = ctx.IDENTIFIER() != null ? ctx.IDENTIFIER().getText() : "";
@@ -173,7 +173,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       FlowchartFragment continueFragment = FlowchartFragment.create(FlowchartFragmentType.CONTINUE, continueNode, emptyArrayList());
       continueFragment.addContinueNode((ContinueFlowchartNode) continueNode);
 
-      continueNodes.add(continueNode);
+      allContinueNodes.add(continueNode);
       return continueFragment;
     } else if (ctx.gotoToken != null) {
       throw TODO();
@@ -291,6 +291,78 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     }
     logger.debug("ifFragment: {}", firstFragment);
     return firstFragment;
+  }
+
+  private String switchConditionPrefix;
+
+  @Override
+  public FlowchartFragment visitSwitchBlock(CodeFlowParser.SwitchBlockContext ctx) {
+    switchConditionPrefix = ANTLRUtil.getTextFromInputStream(ctx.parExpression().expression());
+    if (ctx.switchCaseGroup() != null) {
+      // link all switch case group
+      FlowchartFragment preFragment = null, firstFragment = null;
+      Set<BreakFlowchartNode> breakNodes = new HashSet<>(4);
+      for (CodeFlowParser.SwitchCaseGroupContext switchGroupContext : ctx.switchCaseGroup()) {
+        FlowchartFragment fragment = visitSwitchCaseGroup(switchGroupContext);
+        if (firstFragment == null) {
+          firstFragment = fragment;
+        }
+        if (preFragment != null && !preFragment.isMatchType(FlowchartFragmentType.END)) {
+          // fallthrough this case
+          if (!preFragment.isMatchType(FlowchartFragmentType.BREAK)) {
+            for (FlowchartNode stopNode : preFragment.getStops()) {
+              // every caseFragment has two stops: the false condition and the last statement
+              if (stopNode.getType() != FlowchartNodeType.DECISION && fragment.getStart().getTrueLink() != null) {
+                // link to next true condition
+                stopNode.addLink(fragment.getStart().getTrueLink().to());
+                break;
+              }
+            }
+          }
+          // link other stop nodes
+          preFragment.link(fragment);
+        }
+        if (fragment.isMatchType(FlowchartFragmentType.BREAK)) {
+          breakNodes.addAll(fragment.getBreakNodes());
+        }
+        preFragment = fragment;
+      }
+      // LIMITATION: force default case at the last
+      if (ctx.DEFAULT() != null && ctx.defaultStmt != null) {
+        FlowchartFragment defaultFragment = visitBlockStatements(ctx.defaultStmt);
+        Objects.requireNonNull(preFragment).link(defaultFragment);
+        preFragment = defaultFragment;
+        if (defaultFragment.isMatchType(FlowchartFragmentType.BREAK)) {
+          breakNodes.addAll(defaultFragment.getBreakNodes());
+        }
+      }
+      if (firstFragment != null) {
+        firstFragment.setStops(preFragment.getStops());
+        firstFragment.addStopNodes(new ArrayList<>(breakNodes));
+        // the break node is used
+        // firstFragment.addBreakNodes(breakNodes);
+        firstFragment.setBreakNodes(new HashSet<>(4));
+        // clear other type
+        firstFragment.setType(FlowchartFragmentType.SWITCH);
+      }
+      return firstFragment;
+    }
+    throw TODO("empty switch block");
+  }
+
+  @Override
+  public FlowchartFragment visitSwitchCaseGroup(CodeFlowParser.SwitchCaseGroupContext ctx) {
+    StringBuilder conditionBuilder = new StringBuilder(switchConditionPrefix +
+        "==" +
+        ANTLRUtil.getTextFromInputStream(ctx.switchCase(0).constantExpression));
+    for (int i = 1; i < ctx.switchCase().size(); i++) {
+      conditionBuilder.append(" || ").append(ANTLRUtil.getTextFromInputStream(ctx.switchCase(i).constantExpression));
+    }
+    FlowchartNode conditionNode = Flowchart.decisionNode(conditionBuilder.toString());
+    FlowchartFragment caseFragment = visitBlockStatements(ctx.blockStatements());
+    caseFragment.linkDecisionNodeAsTrueStart(conditionNode);
+    caseFragment.addStopNode(conditionNode);
+    return caseFragment;
   }
 
   /**

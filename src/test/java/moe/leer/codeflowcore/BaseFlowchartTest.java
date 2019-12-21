@@ -15,6 +15,7 @@ public abstract class BaseFlowchartTest {
     FlowchartConfig.setFunctionColor("pink");
 //    FlowchartConfig.setDecisionCompass("s", "w");
     codeFlow = CodeFlow.builder()
+        .failFast(true)
         .workDir("examples")
         .outDir("tests")
         .format(Format.PNG)

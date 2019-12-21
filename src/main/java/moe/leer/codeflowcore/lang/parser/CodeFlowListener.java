@@ -380,6 +380,36 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 */
 	void exitIfBlock(CodeFlowParser.IfBlockContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#switchBlock}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitchBlock(CodeFlowParser.SwitchBlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#switchBlock}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitchBlock(CodeFlowParser.SwitchBlockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#switchCaseGroup}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitchCaseGroup(CodeFlowParser.SwitchCaseGroupContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#switchCaseGroup}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitchCaseGroup(CodeFlowParser.SwitchCaseGroupContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#switchCase}.
+	 * @param ctx the parse tree
+	 */
+	void enterSwitchCase(CodeFlowParser.SwitchCaseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#switchCase}.
+	 * @param ctx the parse tree
+	 */
+	void exitSwitchCase(CodeFlowParser.SwitchCaseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#forBlock}.
 	 * @param ctx the parse tree
 	 */

@@ -141,9 +141,9 @@ public class FlowchartFragment {
    */
   public void link(FlowchartFragment other) {
     for (FlowchartNode stop : this.stops) {
+      if (!stop.isLinkable()) continue;
       if (this.isMatchType(FlowchartFragmentType.DO_WHILE) &&
-          stop.getType() == FlowchartNodeType.DECISION &&
-          stop.isLinkable()) { // special port compass for "do while" loop
+          stop.getType() == FlowchartNodeType.DECISION) { // special port compass for "do while" loop
         if (StringUtils.isNotBlank(FlowchartConfig.doWhileDecisionFalseCompass)) {
           stop.addLink(
               compassLink(stop, Compass.of(FlowchartConfig.doWhileDecisionFalseCompass).get(), other.start).with(Flowchart.falseLable())
@@ -153,7 +153,7 @@ public class FlowchartFragment {
               to(other.start).with(Flowchart.falseLable())
           );
         }
-      } else if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
+      } else if (stop.getType() == FlowchartNodeType.DECISION) {
         stop.addFalseConditionLink(other.start);
       } else {
         stop.addLink(other.start);

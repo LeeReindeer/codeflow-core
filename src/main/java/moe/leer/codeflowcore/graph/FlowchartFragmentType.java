@@ -6,6 +6,7 @@ package moe.leer.codeflowcore.graph;
  */
 public enum FlowchartFragmentType {
   IF,
+  SWITCH,
   FOR,
   WHILE,
   DO_WHILE,
