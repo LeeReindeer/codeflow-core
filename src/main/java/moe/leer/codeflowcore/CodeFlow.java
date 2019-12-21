@@ -5,15 +5,20 @@ import guru.nidi.graphviz.engine.Graphviz;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import moe.leer.codeflowcore.graph.FlowchartFragment;
+import moe.leer.codeflowcore.lang.ThrowSyntaxErrorListener;
 import moe.leer.codeflowcore.lang.FlowchartConnector;
 import moe.leer.codeflowcore.lang.FlowchartGenVisitor;
+import moe.leer.codeflowcore.lang.SyntaxErrorException;
 import moe.leer.codeflowcore.lang.parser.CodeFlowLexer;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.lang.semantic.SymbolDefListener;
 import moe.leer.codeflowcore.lang.semantic.SymbolResolveListener;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.LexerNoViableAltException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.io.IOUtils;
@@ -40,15 +45,22 @@ public class CodeFlow {
   private CodeFlowParser parser;
 
   private boolean supportClass;
+  // throw exception when occurred syntax error
+  @Getter
+  @Setter
+  @Accessors(chain = true)
+  private boolean failFast;
 
   private Integer height;
   private Integer width;
 
   @Getter
   @Setter
+  @Accessors(chain = true)
   private String workDir = "./";
   @Getter
   @Setter
+  @Accessors(chain = true)
   private String outDir = "./";
   private Format format = Format.PNG;
   private File outFile;
@@ -57,11 +69,27 @@ public class CodeFlow {
     return parse(supplier.get());
   }
 
+  static class BailCodeFlowLexer extends CodeFlowLexer {
+
+    public BailCodeFlowLexer(CharStream input) {
+      super(input);
+    }
+
+    @Override
+    public void recover(LexerNoViableAltException e) {
+      throw new SyntaxErrorException(e);
+    }
+  }
+
   public CodeFlow parse(@NotNull String code) {
     if (StringUtils.isNotBlank(code)) {
       // init lexer and parser
       if (lexer == null) {
-        lexer = new CodeFlowLexer(CharStreams.fromString(code));
+        if (failFast) {
+          lexer = new BailCodeFlowLexer(CharStreams.fromString(code));
+        } else {
+          lexer = new CodeFlowLexer(CharStreams.fromString(code));
+        }
       }
       lexer.setInputStream(CharStreams.fromString(code));
       CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -69,6 +97,10 @@ public class CodeFlow {
         parser = new CodeFlowParser(tokens);
       }
       parser.setTokenStream(tokens);
+      if (failFast) {
+        parser.removeErrorListeners();
+        parser.addErrorListener(new ThrowSyntaxErrorListener());
+      }
       CodeFlowParser.supportClass = this.supportClass;
 
       // output parse tree
@@ -150,7 +182,6 @@ public class CodeFlow {
     }
   }
 
-  @NotNull
   private String getAndCreateDir(@NotNull String dir) throws IOException {
     if (!dir.endsWith("/")) {
       dir = dir + "/";
