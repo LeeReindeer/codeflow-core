@@ -1,5 +1,7 @@
 # CodeFlow API
 
+<img alt="icon" src="art/codeflow.webp" />
+
 [![](https://jitpack.io/v/LeeReindeer/codeflow-core.svg)](https://jitpack.io/#LeeReindeer/codeflow-core)
 
 Let's convert Java code to flowchart graph!
