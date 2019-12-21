@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import moe.leer.codeflowcore.graph.FlowchartFragment;
-import moe.leer.codeflowcore.lang.ThrowSyntaxErrorListener;
 import moe.leer.codeflowcore.lang.FlowchartConnector;
 import moe.leer.codeflowcore.lang.FlowchartGenVisitor;
-import moe.leer.codeflowcore.lang.SyntaxErrorException;
+import moe.leer.codeflowcore.exception.SyntaxErrorException;
+import moe.leer.codeflowcore.lang.ThrowSyntaxErrorListener;
 import moe.leer.codeflowcore.lang.parser.CodeFlowLexer;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.lang.semantic.SymbolDefListener;
@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 public class CodeFlow {
 
   private Graphviz graphviz;
-  private CodeFlowLexer lexer = new CodeFlowLexer(null);
+  private CodeFlowLexer lexer;
   private CodeFlowParser parser;
 
   private boolean supportClass;
@@ -92,7 +92,7 @@ public class CodeFlow {
         }
       }
       lexer.setInputStream(CharStreams.fromString(code));
-      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      final CommonTokenStream tokens = new CommonTokenStream(lexer);
       if (parser == null) {
         parser = new CodeFlowParser(tokens);
       }

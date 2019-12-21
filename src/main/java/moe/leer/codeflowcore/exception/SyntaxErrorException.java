@@ -1,4 +1,4 @@
-package moe.leer.codeflowcore.lang;
+package moe.leer.codeflowcore.exception;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 

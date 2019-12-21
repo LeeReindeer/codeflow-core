@@ -15,7 +15,7 @@ import java.util.Objects;
 
 import static guru.nidi.graphviz.model.Factory.mutNode;
 import static java.util.Arrays.asList;
-import static moe.leer.codeflowcore.TodoException.TODO;
+import static moe.leer.codeflowcore.exception.TodoException.TODO;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
 

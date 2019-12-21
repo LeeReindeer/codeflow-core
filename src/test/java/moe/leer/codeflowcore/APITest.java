@@ -1,6 +1,6 @@
 package moe.leer.codeflowcore;
 
-import moe.leer.codeflowcore.lang.SyntaxErrorException;
+import moe.leer.codeflowcore.exception.SyntaxErrorException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

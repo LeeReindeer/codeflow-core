@@ -9,12 +9,13 @@ import moe.leer.codeflowcore.util.ANTLRUtil;
 import moe.leer.codeflowcore.util.ParseUtil;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static moe.leer.codeflowcore.TodoException.TODO;
+import static moe.leer.codeflowcore.exception.TodoException.TODO;
 import static moe.leer.codeflowcore.graph.Flowchart.trueLabel;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
@@ -175,11 +176,12 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       continueNodes.add(continueNode);
       return continueFragment;
     } else if (ctx.gotoToken != null) {
-
+      throw TODO();
     } else if (ctx.emptyStmt != null) {
-
+      // TODO create a invisible node
+      throw TODO();
     } else if (ctx.labelStmt != null) {
-
+      throw TODO();
     } else if (ctx.expressionStmt != null) {
       return visitExpression(ctx.expressionStmt);
     } else { // variableDeclarators ,variableAssign
@@ -199,7 +201,6 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       }
       return FlowchartFragment.singleProcess(Flowchart.processNode(single));
     }
-    return null;
   }
 
   /**
@@ -208,7 +209,6 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
   @Override
   public FlowchartFragment visitExpression(CodeFlowParser.ExpressionContext ctx) {
     if (ctx.functionCall() != null) {
-      // todo link function call, use ParseTreeProperty to save function call node
 //      FlowchartNode call = Flowchart.processNode(ctx).add(Color.LIGHTBLUE, Style.FILLED);
       FlowchartNode call = Flowchart.functionCallNode(ctx, FlowchartNodeType.PROCESS);
       CodeFlowParser.FunctionCallContext functionCallContext = grepFunctionCallContext(ctx);
@@ -298,7 +298,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
    * 1. the continue node is link with <code>target</code> node
    * 2. the break node(without label) is treated as stop node, which will be linked in <code>linkStatements()</code>
    */
-  private void linkBreakContinueNodesInLoop(FlowchartFragment loopFragment, FlowchartNode target) {
+  private void linkBreakContinueNodesInLoop(@NotNull FlowchartFragment loopFragment, @NotNull FlowchartNode target) {
     if (!loopFragment.getContinueNodes().isEmpty()) {
       for (ContinueFlowchartNode continueNode : loopFragment.getContinueNodes()) {
         // the continue node is not lined yet and without label

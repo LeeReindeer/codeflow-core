@@ -1,5 +1,6 @@
 package moe.leer.codeflowcore.lang;
 
+import moe.leer.codeflowcore.exception.SyntaxErrorException;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;

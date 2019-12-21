@@ -1,4 +1,4 @@
-package moe.leer.codeflowcore;
+package moe.leer.codeflowcore.exception;
 
 /**
  * @author leer
