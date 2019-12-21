@@ -38,12 +38,11 @@ public class ScopesManager {
     scopes.put(context, scope);
   }
 
-
   public Scope obtainScope(ParserRuleContext context) {
     return scopes.get(context);
   }
 
-  public void enterScope(ParserRuleContext context, Scope scope) {
+  public void enterAndSaveScope(ParserRuleContext context, Scope scope) {
     currentScope.getChildrenScope().add(scope);
     currentScope = scope;
     scopes.put(context, scope);
@@ -75,7 +74,9 @@ public class ScopesManager {
   public void defineVar(CodeFlowParser.VariableTypeContext typeContext, String name, String text) {
 //    int type = typeContext.start.getType();
     VariableSymbol variableSymbol = new VariableSymbol(name, text, ANTLRUtil.getTextFromInputStream(typeContext));
-    if (currentScope.resolve(name) != null) {
+    Symbol definedSymbol = currentScope.resolve(name);
+    // duplicated symbol in same scope
+    if (definedSymbol != null && definedSymbol.getScope() == currentScope) {
       error(typeContext.start, "Duplicated variable declare: " + name);
     }
     currentScope.define(variableSymbol);

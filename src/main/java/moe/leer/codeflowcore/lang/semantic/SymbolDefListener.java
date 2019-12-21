@@ -37,7 +37,7 @@ public class SymbolDefListener extends CodeFlowBaseListener {
 
   @Override
   public void enterClassDeclaration(CodeFlowParser.ClassDeclarationContext ctx) {
-    scopesManager.enterScope(ctx, new ClassScope(scopesManager.currentScope));
+    scopesManager.enterAndSaveScope(ctx, new ClassScope(scopesManager.currentScope));
   }
 
   @Override
@@ -48,7 +48,7 @@ public class SymbolDefListener extends CodeFlowBaseListener {
   @Override
   public void enterBlock(CodeFlowParser.BlockContext ctx) {
     BlockScope blockScope = new BlockScope(scopesManager.currentScope);
-    scopesManager.enterScope(ctx, blockScope);
+    scopesManager.enterAndSaveScope(ctx, blockScope);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class SymbolDefListener extends CodeFlowBaseListener {
       }
     }
     scopesManager.currentScope.define(function); // save function symbol
-    scopesManager.enterScope(ctx, function);
+    scopesManager.enterAndSaveScope(ctx, function);
   }
 
   @Override
@@ -97,10 +97,17 @@ public class SymbolDefListener extends CodeFlowBaseListener {
   public void exitVariableDeclarators(CodeFlowParser.VariableDeclaratorsContext ctx) {
     CodeFlowParser.VariableTypeContext typeContext = ctx.variableType();
     for (CodeFlowParser.VariableDeclaratorContext varContext : ctx.variableDeclarator()) {
-      scopesManager.defineVar(typeContext,
-          ANTLRUtil.getTextFromInputStream(varContext.variableDeclaratorId()),
-          ANTLRUtil.getTextFromInputStream(varContext.variableInitializer())
-      );
+      if (varContext.variableInitializer() == null) {
+        scopesManager.defineVar(typeContext,
+            ANTLRUtil.getTextFromInputStream(varContext.variableDeclaratorId()),
+            null
+        );
+      } else {
+        scopesManager.defineVar(typeContext,
+            ANTLRUtil.getTextFromInputStream(varContext.variableDeclaratorId()),
+            ANTLRUtil.getTextFromInputStream(varContext.variableInitializer())
+        );
+      }
     }
   }
 }

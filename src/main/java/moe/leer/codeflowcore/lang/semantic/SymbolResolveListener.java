@@ -10,6 +10,9 @@ import moe.leer.codeflowcore.util.ANTLRUtil;
 import moe.leer.codeflowcore.util.ParseUtil;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author leer
  * Created at 12/16/19 1:04 PM
@@ -18,6 +21,8 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
 
   @Getter
   private ScopesManager scopesManager;
+  @Getter
+  private List<String> errorMessages = new ArrayList<>(4);
 
   public SymbolResolveListener(ParseTreeProperty<Scope> scopes, GlobalScope globalScope) {
     scopesManager = new ScopesManager(scopes, globalScope);
@@ -61,7 +66,9 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
     String name = ANTLRUtil.getTextFromInputStream(ctx.variableId);
     Symbol var = scopesManager.resolve(name);
     if (var == null) {
-      scopesManager.error(ctx.variableId.getStart(), "no such variable: " + name);
+      String error = "no such variable: " + name;
+      errorMessages.add(error);
+      scopesManager.error(ctx.variableId.getStart(), error);
     }
   }
 
@@ -77,7 +84,9 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
       String functionName = ParseUtil.getFunctionFullName2(ctx);
       Symbol func = scopesManager.resolveFunction(functionName);
       if (func == null) {
-        scopesManager.error(ctx.functionCallName().getStart(), "no such function: " + functionName);
+        String error = "no such function: " + functionName;
+        errorMessages.add(error);
+        scopesManager.error(ctx.functionCallName().getStart(), error);
       }
     }
   }
@@ -91,7 +100,9 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
     String name = ctx.IDENTIFIER(0).getText();
     Symbol var = scopesManager.resolve(name);
     if (var == null) {
-      scopesManager.error(ctx.getStart(), "no such variable: " + name);
+      String error = "no such variable: " + name;
+      errorMessages.add(error);
+      scopesManager.error(ctx.getStart(), error);
     }
   }
 
