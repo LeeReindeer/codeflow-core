@@ -75,8 +75,8 @@ For snapshot, use `master-SNAPSHOT` as the version tag.
 ```java
 CodeFlow codeFlow = CodeFlow.builder()
         .supportClass(false)        // whether support class declare
-        .failFast(true)					// not recovery from syntax error
-   										   // the graph will not created when syntax error occurred.
+        .failFast(true)		    // not recovery from syntax error
+   			            // the graph will not created when syntax error occurred.
         .workDir("examples")        // input file dir
         .outDir("tests")            // output file dir
         .format(Format.PNG)         // output file format
