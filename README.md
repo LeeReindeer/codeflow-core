@@ -8,14 +8,17 @@ Let's convert Java code to flowchart graph!
 
 Java code to flowchart graph:
 
+`*`: reconsider or will not be supported.
+
 - [x] Control flow in Java: sequence, loop(`for`, `while`, `do while`) and condition(`if`)
-- [ ] Support `switch` statement
-- [ ] Support `break`, `contuine` and labels
+- [x] Support `switch` statement
+- [x] Support `break`, `contuine`
+- [ ] *Support labels and `goto`
 - [x] Top-level function and statement
 - [x] Multi-function supported, which represented in subgraphs
 - [x] Function overload(different arguments size only)
 - [x] Semantic check and warning
-- [ ] Support Class method
+- [ ] *Support Class method
 
 ## Quick start
 
@@ -29,7 +32,7 @@ codeFlow.parse("if(ok){doSome();}else{doSomeElse();}").toFile("file.png");
 
 ## Usage
 
-1. Add dependency
+1. **Add dependency**
 
 Maven:
 
@@ -67,19 +70,36 @@ implementation 'com.github.LeeReindeer:codeflow-core:${latest-version}'
 
 For snapshot, use `master-SNAPSHOT` as the version tag.
 
-2. Get a builder
+2. **Get a builder**
 
 ```java
 CodeFlow codeFlow = CodeFlow.builder()
         .supportClass(false)        // whether support class declare
-        .functionColor("lightblue") // node color for function call
+        .failFast(true)					// not recovery from syntax error
+   										   // the graph will not created when syntax error occurred.
         .workDir("examples")        // input file dir
         .outDir("tests")            // output file dir
         .format(Format.PNG)         // output file format
         .build();
 ```
 
-3. Do Convert
+3.  **Configuration Flowchart style(optional)**
+
+All flowchart configuration is in `FlowchartConfig` as static fields.
+
+```java
+  public static String functionColor = "lightblue"; //function call node color
+  // You can set decision nodes' compass,
+  // but the best you can do is not interfering the layout engine.
+  // It will avoid most line intersections in graphviz.
+  // Nevertheless, if you sill want to customize, the recommend preference is commented following.
+  public static String decisionTrueCompass; // s
+  public static String decisionFalseCompass; // w
+  public static String doWhileDecisionTrueCompass; // e
+  public static String doWhileDecisionFalseCompass; // s
+```
+
+4. **Do Convert**
 
 -  `parse(String code)`
 
