@@ -20,6 +20,7 @@ import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.lang.semantic.SymbolDefListener;
 import moe.leer.codeflowcore.lang.semantic.SymbolResolveListener;
 import moe.leer.codeflowcore.util.NativeUtil;
+import moe.leer.codeflowcore.util.SomeUtil;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -212,20 +213,18 @@ public class CodeFlow {
 
   public BufferedImage toImage() throws IOException {
     if (useNative) {
-      String randomTempFile = "\tmp\\" + FlowchartNodeFactory.randomName() + "." + format.fileExtension;
-      toFile(randomTempFile);
-      renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), randomTempFile);
-      File file = new File(randomTempFile);
+      File file = SomeUtil.createTempFile(FlowchartNodeFactory.randomName(), "." + format.fileExtension);
+      renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), file.getAbsolutePath());
+      logger.debug("create tmp file: " + file.getAbsolutePath());
       return ImageIO.read(file);
     } else {
       if (graphviz != null) {
         try {
           return graphviz.render(this.format).toImage();
         } catch (GraphvizException e) {
-          String randomTempFile = "\tmp\\" + FlowchartNodeFactory.randomName() + ".png";
-          toFile(randomTempFile);
-          renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), randomTempFile);
-          File file = new File(randomTempFile);
+          File file = SomeUtil.createTempFile(FlowchartNodeFactory.randomName(), "." + format.fileExtension);
+          renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), file.getAbsolutePath());
+          logger.debug("create tmp file: " + file.getAbsolutePath());
           return ImageIO.read(file);
         }
       } else {

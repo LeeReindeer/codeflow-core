@@ -3,6 +3,8 @@ package moe.leer.codeflowcore.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static java.util.Arrays.asList;
@@ -20,5 +22,17 @@ public class SomeUtil {
 
   public static <T> ArrayList<T> emptyArrayList() {
     return new ArrayList<>(4);
+  }
+
+  public static File createTempFile(String prefix, String suffix) throws IOException {
+    String tmpDirName = System.getProperty("java.io.tmpdir");
+    File tmpDir = new File(tmpDirName);
+    if (!tmpDir.exists()) {
+      tmpDir.mkdir();
+    }
+    File file = File.createTempFile(prefix, suffix, tmpDir);
+    // Clean up the file when exiting
+    file.deleteOnExit();
+    return file;
   }
 }
