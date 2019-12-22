@@ -15,13 +15,17 @@ import java.io.*;
 public class NativeUtil {
   public static final Logger LOG = LoggerFactory.getLogger(NativeUtil.class);
 
-  public static void loadLibrary(String library) {
+  public static void loadLibraryFromResource(String library) {
     try {
       System.load(saveLibrary(library));
     } catch (IOException e) {
       LOG.warn("Could not find library " + library +
           " as resource, trying fallback lookup through System.loadLibrary");
-      System.loadLibrary(library);
+      try {
+        System.loadLibrary(library);
+      } catch (UnsatisfiedLinkError error) {
+        e.printStackTrace();
+      }
     }
   }
 

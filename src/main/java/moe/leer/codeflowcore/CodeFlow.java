@@ -71,7 +71,7 @@ public class CodeFlow {
   private boolean useNative;
 
   static {
-    NativeUtil.loadLibrary("gv");
+    NativeUtil.loadLibraryFromResource("gv");
   }
 
   /**
