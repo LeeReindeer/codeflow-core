@@ -1,7 +1,5 @@
 package moe.leer.codeflowcore;
 
-import guru.nidi.graphviz.engine.Format;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -14,31 +12,31 @@ public class IfBlockTest extends BaseFlowchartTest {
 
   @Test
   public void testSimpleIf() throws IOException {
-    codeFlow.parseFile("ifCode.cf").toFile("simpleIf.png");
+    baseFlowchartTest("ifCode.cf");
   }
 
   @Test
   public void testNestedIf() throws IOException {
-    codeFlow.parseFile("nestedIf.cf").toFile("nestedIf");
+    baseFlowchartTest("nestedIf.cf");
   }
 
   @Test
   public void testIfAndElse() throws IOException {
-    codeFlow.parseFile("ifAndElse.cf").toFile("ifAndElse");
+    baseFlowchartTest("ifAndElse.cf");
   }
 
   @Test
   public void testIfElseIf() throws IOException {
-    codeFlow.parseFile("ifElseIf.cf").toFile("ifIfElse");
+    baseFlowchartTest("ifElseIf.cf");
   }
 
   @Test
   public void testIfElseIfElse() throws IOException {
-    codeFlow.parseFile("ifElseIfElse.cf").toFile("ifIfElseElse");
+    baseFlowchartTest("ifElseIfElse.cf");
   }
 
   @Test
   public void testIfExample() throws IOException {
-    codeFlow.parseFile("ifExample1.cf").toFile("IfExample1");
+    baseFlowchartTest("ifExample1.cf");
   }
 }

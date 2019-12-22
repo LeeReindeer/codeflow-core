@@ -12,29 +12,28 @@ public class ForBlockTest extends BaseFlowchartTest {
 
   @Test
   public void testForCode() throws IOException {
-    codeFlow.parseFile("forCode.cf").toFile("forCode");
+    baseFlowchartTest("forCode.cf");
   }
 
   @Test
   public void testForNestIf() throws IOException {
-    codeFlow.parseFile("forNestIf.cf").toFile("forNestIf");
+    baseFlowchartTest("forNestIf.cf");
   }
 
   @Test
   public void testNestedFor() throws IOException {
-    codeFlow.parseFile("nestedFor.cf").toFile("nestFor");
-    codeFlow.parseFile("nestedFor2.cf").toFile("nestFor2");
+    baseFlowchartTest("nestedFor.cf");
+    baseFlowchartTest("nestedFor2.cf");
   }
 
   @Test
   public void testForBreak() throws IOException {
-    codeFlow.parseFile("forBreak.cf").toFile("forBreak");
+    baseFlowchartTest("forBreak.cf");
   }
 
   @Test
   public void testNestedForBreak() throws IOException {
-//    codeFlow.parseFile("dp.cf").toFile("nestedForBreak");
-    codeFlow.parseFile("nestedForBreak.cf").toFile("nestedForBreak");
+    baseFlowchartTest("nestedForBreak.cf");
   }
 
   @Test

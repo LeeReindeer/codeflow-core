@@ -1,5 +1,4 @@
 <h1>CodeFlow<img alt="icon" src="art/codeflow.webp"/></h1>
-
 [![](https://jitpack.io/v/LeeReindeer/codeflow-core.svg)](https://jitpack.io/#LeeReindeer/codeflow-core)
 
 Let's convert Java code to flowchart graph!

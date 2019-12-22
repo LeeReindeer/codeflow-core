@@ -11,11 +11,11 @@ import java.io.IOException;
 public class SwitchBlockTest extends BaseFlowchartTest {
   @Test
   public void testSwitch() throws IOException {
-    codeFlow.parseFile("switch.cf").toFile("switch");
+    baseFlowchartTest("switch.cf");
   }
 
   @Test
   public void testTrickSwitch() throws IOException {
-    codeFlow.parseFile("trickSwitch.cf").toFile("trickSwitch");
+    baseFlowchartTest("trickSwitch.cf");
   }
 }

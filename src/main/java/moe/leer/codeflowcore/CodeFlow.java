@@ -1,20 +1,25 @@
 package moe.leer.codeflowcore;
 
+import guru.nidi.graphviz.engine.Engine;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.engine.GraphvizException;
+import guru.nidi.graphviz.model.MutableGraph;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import moe.leer.codeflowcore.exception.SyntaxErrorException;
 import moe.leer.codeflowcore.graph.FlowchartFragment;
+import moe.leer.codeflowcore.graph.FlowchartNodeFactory;
 import moe.leer.codeflowcore.lang.FlowchartConnector;
 import moe.leer.codeflowcore.lang.FlowchartGenVisitor;
-import moe.leer.codeflowcore.exception.SyntaxErrorException;
 import moe.leer.codeflowcore.lang.ThrowSyntaxErrorListener;
 import moe.leer.codeflowcore.lang.parser.CodeFlowLexer;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.lang.semantic.SymbolDefListener;
 import moe.leer.codeflowcore.lang.semantic.SymbolResolveListener;
+import moe.leer.codeflowcore.util.NativeUtil;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -23,8 +28,13 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.graphviz.SWIGTYPE_p_Agraph_t;
+import org.graphviz.gv;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,17 +50,33 @@ import java.util.function.Supplier;
 @Builder
 public class CodeFlow {
 
+  public static final Logger logger = LoggerFactory.getLogger(CodeFlow.class);
+
   private Graphviz graphviz;
+  private MutableGraph graph;
   private CodeFlowLexer lexer;
   private CodeFlowParser parser;
 
   private boolean supportClass;
-  // throw exception when occurred syntax error
   @Getter
   @Setter
   @Accessors(chain = true)
+  // throw exception when occurred syntax error
   private boolean failFast;
 
+  @Getter
+  @Setter
+  @Accessors(chain = true)
+  // use graphviz native binding
+  private boolean useNative;
+
+  static {
+    NativeUtil.loadLibrary("gv");
+  }
+
+  /**
+   * height and width are ignored when <code>useIgnore</code> is true
+   */
   private Integer height;
   private Integer width;
 
@@ -116,7 +142,8 @@ public class CodeFlow {
 
       FlowchartConnector connector = new FlowchartConnector(visitor.functionCallNodes, visitor.subFragments);
       connector.connect(flowChart.getGraph());
-      graphviz = Graphviz.fromGraph(flowChart.getGraph());
+      this.graph = flowChart.getGraph();
+      graphviz = Graphviz.fromGraph(flowChart.getGraph()).engine(Engine.DOT);
       if (height != null) {
         graphviz = graphviz.height(height);
       }
@@ -148,8 +175,6 @@ public class CodeFlow {
     this.height = height;
     if (graphviz != null) {
       graphviz = graphviz.height(height);
-    } else {
-      throw new IllegalStateException("Please call CodeFlow#parse first");
     }
     return this;
   }
@@ -158,28 +183,61 @@ public class CodeFlow {
     this.width = width;
     if (graphviz != null) {
       graphviz = graphviz.width(width);
-    } else {
-      throw new IllegalStateException("Please call CodeFlow#parse first");
     }
     return this;
   }
 
   public File toFile(@NotNull String pathName) throws IOException {
+    if (!pathName.endsWith("." + format.fileExtension)) {
+      pathName += ("." + format.fileExtension);
+    }
     this.outFile = new File(getAndCreateDir(outDir) + pathName);
-    if (graphviz != null) {
-      graphviz.render(this.format).toFile(outFile);
+
+    if (useNative) {
+      renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), outFile.getAbsolutePath());
     } else {
-      throw new IllegalStateException("Please call CodeFlow#parse first");
+      if (graphviz != null) {
+        try {
+          graphviz.render(this.format).toFile(outFile);
+        } catch (GraphvizException e) {
+          logger.error(e.getMessage());
+          renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), outFile.getAbsolutePath());
+        }
+      } else {
+        throw new IllegalStateException("Please call CodeFlow#parse first");
+      }
     }
     return this.outFile;
   }
 
-  public BufferedImage toImage() {
-    if (graphviz != null) {
-      return graphviz.render(this.format).toImage();
+  public BufferedImage toImage() throws IOException {
+    if (useNative) {
+      String randomTempFile = "\tmp\\" + FlowchartNodeFactory.randomName() + "." + format.fileExtension;
+      toFile(randomTempFile);
+      renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), randomTempFile);
+      File file = new File(randomTempFile);
+      return ImageIO.read(file);
     } else {
-      throw new IllegalStateException("Please call CodeFlow#parse first");
+      if (graphviz != null) {
+        try {
+          return graphviz.render(this.format).toImage();
+        } catch (GraphvizException e) {
+          String randomTempFile = "\tmp\\" + FlowchartNodeFactory.randomName() + ".png";
+          toFile(randomTempFile);
+          renderWithNativeLibrary(this.graph.toString(), format.name().toLowerCase(), randomTempFile);
+          File file = new File(randomTempFile);
+          return ImageIO.read(file);
+        }
+      } else {
+        throw new IllegalStateException("Please call CodeFlow#parse first");
+      }
     }
+  }
+
+  private boolean renderWithNativeLibrary(String dotString, String format, String filename) {
+    SWIGTYPE_p_Agraph_t g = gv.readstring(dotString);
+    gv.layout(g, "dot");
+    return gv.render(g, format, filename);
   }
 
   private String getAndCreateDir(@NotNull String dir) throws IOException {
