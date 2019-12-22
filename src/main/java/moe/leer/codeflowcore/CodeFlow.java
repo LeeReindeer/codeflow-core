@@ -5,7 +5,6 @@ import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.engine.GraphvizException;
 import guru.nidi.graphviz.model.MutableGraph;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -45,10 +44,11 @@ import java.nio.file.Files;
 import java.util.function.Supplier;
 
 /**
+ * CodeFlow API
+ *
  * @author leer
  * Created at 12/11/19 7:46 PM
  */
-@Builder
 public class CodeFlow {
 
   public static final Logger logger = LoggerFactory.getLogger(CodeFlow.class);
@@ -58,6 +58,9 @@ public class CodeFlow {
   private CodeFlowLexer lexer;
   private CodeFlowParser parser;
 
+  @Getter
+  @Setter
+  @Accessors(chain = true)
   private boolean supportClass;
   @Getter
   @Setter
@@ -89,8 +92,23 @@ public class CodeFlow {
   @Setter
   @Accessors(chain = true)
   private String outDir = "./";
+  @Getter
+  @Setter
+  @Accessors(chain = true)
   private Format format = Format.PNG;
   private File outFile;
+
+
+  public CodeFlow(boolean supportClass, boolean failFast, boolean useNative, Integer height, Integer width, String workDir, String outDir, Format format) {
+    this.supportClass = supportClass;
+    this.failFast = failFast;
+    this.useNative = useNative;
+    this.height = height;
+    this.width = width;
+    this.workDir = workDir;
+    this.outDir = outDir;
+    this.format = format;
+  }
 
   public CodeFlow parse(@NotNull Supplier<String> supplier) {
     return parse(supplier.get());
@@ -262,7 +280,70 @@ public class CodeFlow {
     walker.walk(symbolResolveListener, tree);
   }
 
-  public static CodeFlow build() {
-    return CodeFlow.builder().build();
+  public static CodeFlowBuilder builder() {
+    return new CodeFlowBuilder();
+  }
+
+
+  public static class CodeFlowBuilder {
+    private boolean supportClass;
+    private boolean failFast;
+    private boolean useNative;
+    private Integer height;
+    private Integer width;
+    private String workDir;
+    private String outDir;
+    private Format format;
+
+    CodeFlowBuilder() {
+    }
+
+    public CodeFlow.CodeFlowBuilder supportClass(boolean supportClass) {
+      this.supportClass = supportClass;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder failFast(boolean failFast) {
+      this.failFast = failFast;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder useNative(boolean useNative) {
+      this.useNative = useNative;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder height(Integer height) {
+      this.height = height;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder width(Integer width) {
+      this.width = width;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder workDir(String workDir) {
+      this.workDir = workDir;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder outDir(String outDir) {
+      this.outDir = outDir;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder format(Format format) {
+      this.format = format;
+      return this;
+    }
+
+    public CodeFlow build() {
+      return new CodeFlow(this.supportClass, this.failFast, this.useNative, this.height, this.width, this.workDir, this.outDir, this.format);
+    }
+
+    public String toString() {
+      return "CodeFlow.CodeFlowBuilder(supportClass=" + this.supportClass + ", failFast=" + this.failFast + ", useNative=" + this.useNative + ", height=" + this.height + ", width=" + this.width + ", workDir=" + this.workDir + ", outDir=" + this.outDir + ", format=" + this.format + ", outFile=" + ")";
+    }
   }
 }
