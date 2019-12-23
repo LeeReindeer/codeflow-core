@@ -23,39 +23,39 @@ import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.uniqueFcNode;
 public class Flowchart {
 
   public static FlowchartNode startNode() {
-    return uniqueFcNode(FlowchartNodeType.START);
+    return uniqueFcNode(FlowchartNodeType.START).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
 
   public static FlowchartNode sameStartNode() {
-    return fcNode(FlowchartNodeType.START);
+    return fcNode(FlowchartNodeType.START).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
   public static FlowchartNode startNode(String start) {
-    return uniqueFcNode(start, FlowchartNodeType.START);
+    return uniqueFcNode(start, FlowchartNodeType.START).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
   public static FlowchartNode sameStartNode(String start) {
-    return uniqueFcNode(start, FlowchartNodeType.START);
+    return fcNode(start, FlowchartNodeType.START).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
   public static FlowchartNode endNode() {
-    return uniqueFcNode(FlowchartNodeType.END);
+    return uniqueFcNode(FlowchartNodeType.END).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
   public static FlowchartNode sameEndNode() {
-    return fcNode(FlowchartNodeType.END);
+    return fcNode(FlowchartNodeType.END).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
   public static FlowchartNode endNode(String end) {
-    return uniqueFcNode(end, FlowchartNodeType.END);
+    return uniqueFcNode(end, FlowchartNodeType.END).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
   /**
    * End nodes use same text are treated as the same node
    */
   public static FlowchartNode sameEndNode(String end) {
-    return uniqueFcNode(end, FlowchartNodeType.END);
+    return fcNode(end, FlowchartNodeType.END).add(Shape.RECTANGLE, Style.ROUNDED);
   }
 
   /**
