@@ -9,6 +9,8 @@ import lombok.Setter;
 //@Accessors(chain = true, fluent = true)
 public final class FlowchartConfig {
 
+  public static boolean virtualStartNode = true;
+  public static boolean virtualEndNode = true;
   @Setter
   public static String functionColor = "lightblue";
   @Setter

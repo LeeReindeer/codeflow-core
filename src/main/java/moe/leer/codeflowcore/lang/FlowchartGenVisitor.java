@@ -2,8 +2,11 @@ package moe.leer.codeflowcore.lang;
 
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.MutableGraph;
+import moe.leer.codeflowcore.FlowchartConfig;
+import moe.leer.codeflowcore.graph.Flowchart;
 import moe.leer.codeflowcore.graph.FlowchartFragment;
 import moe.leer.codeflowcore.graph.FlowchartFragmentType;
+import moe.leer.codeflowcore.graph.FlowchartNodeType;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.util.ANTLRUtil;
 import moe.leer.codeflowcore.util.ParseUtil;
@@ -60,6 +63,7 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
           subgraph.getGraph().addTo(rootGraph);
         }
       } else if (declarationContext.topLevelStmts() != null) {
+        // link statements split by function
         FlowchartFragment fragment = super.visitTopLevelStmts(declarationContext.topLevelStmts());
         if (firstFragment == null) {
           firstFragment = fragment;
@@ -68,13 +72,20 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
           preFragment.link(fragment);
         }
         preFragment = fragment;
-//        rootGraph.add(topNode.getStart());
       }
     }
     if (firstFragment != null) {
+      // add a end node
+      if (FlowchartConfig.virtualEndNode) {
+        preFragment.linkNode2Stop(Flowchart.endNode());
+      }
+      // add a start node
+      if (FlowchartConfig.virtualStartNode) {
+        if (firstFragment.getStart().getType() != FlowchartNodeType.START) {
+          firstFragment.linkNodeAsStart(Flowchart.startNode());
+        }
+      }
       firstFragment.setStops(preFragment.getStops());
-    }
-    if (firstFragment != null) {
       rootGraph.add(firstFragment.getStart());
     }
     return root;
@@ -90,11 +101,15 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
     // only blockStatements can be null
     if (ctx.functionBody().block().blockStatements() != null) {
       FlowchartFragment functionBody = super.visitBlockStatements(ctx.functionBody().block().blockStatements());
+      // add a start node, function has a start node by default, not by configuration
+      if (functionBody.getStart().getType() != FlowchartNodeType.START) {
+        functionBody.linkNodeAsStart(Flowchart.startNode());
+      }
       String functionDisplayName = ctx.IDENTIFIER().getText() + ANTLRUtil.getTextFromInputStream(ctx.formalParams());
       String functionFullName = ParseUtil.getFunctionFullName2(ctx);
       MutableGraph subgraph = mutGraph(functionDisplayName)
           .setCluster(true).setDirected(true);
-      subgraph.graphAttrs().add(Label.of("function " + ctx.IDENTIFIER().getText()));
+      subgraph.graphAttrs().add(Label.of(functionDisplayName));
       subgraph.add(functionBody.getStart());
       fragment = FlowchartFragment.create(FlowchartFragmentType.FUNCTION, functionBody.getStart(), functionBody.getStops());
       fragment.setGraph(subgraph);
