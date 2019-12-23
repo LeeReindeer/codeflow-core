@@ -12,11 +12,13 @@ import java.io.IOException;
 public abstract class BaseFlowchartTest {
   protected CodeFlow codeFlow;
 
-  public static final String nativeOutPutPrefix = "native-";
+  public static String outPutPrefix = "";
+  public static String nativeOutPutPrefix = "native-";
 
   @BeforeClass
   public void before() {
     FlowchartConfig.setFunctionColor("pink");
+    FlowchartConfig.virtualEndNode = true;
 //    FlowchartConfig.setDecisionCompass("s", "w");
     codeFlow = CodeFlow.builder()
         .failFast(true)
@@ -27,16 +29,28 @@ public abstract class BaseFlowchartTest {
         .build();
   }
 
-  public void baseFlowchartTest(String inputFile) {
-    int dotIndex = inputFile.indexOf('.');
-    String fileNameWithoutSuffix = inputFile.substring(0, dotIndex == -1 ? inputFile.length() : dotIndex);
-    baseFlowchartTest(inputFile, fileNameWithoutSuffix);
-  }
-
-  public void baseFlowchartTest(String inputFilepath, String outputFileName) {
+  public void baseFlowchartTest(String code, String outputFileName) {
     try {
       if (codeFlow.isUseNative()) {
-        codeFlow.parseFile(inputFilepath).toFile(nativeOutPutPrefix + outputFileName);
+        codeFlow.parse(code).toFile(nativeOutPutPrefix + outPutPrefix + outputFileName);
+      } else {
+        codeFlow.parse(code).toFile(outputFileName);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void baseFlowchartFileTest(String inputFile) {
+    int dotIndex = inputFile.indexOf('.');
+    String fileNameWithoutSuffix = inputFile.substring(0, dotIndex == -1 ? inputFile.length() : dotIndex);
+    baseFlowchartFileTest(inputFile, fileNameWithoutSuffix);
+  }
+
+  public void baseFlowchartFileTest(String inputFilepath, String outputFileName) {
+    try {
+      if (codeFlow.isUseNative()) {
+        codeFlow.parseFile(inputFilepath).toFile(nativeOutPutPrefix + outPutPrefix + outputFileName);
       } else {
         codeFlow.parseFile(inputFilepath).toFile(outputFileName);
       }

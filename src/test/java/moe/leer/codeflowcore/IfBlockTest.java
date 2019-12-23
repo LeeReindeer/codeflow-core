@@ -12,31 +12,31 @@ public class IfBlockTest extends BaseFlowchartTest {
 
   @Test
   public void testSimpleIf() throws IOException {
-    baseFlowchartTest("ifCode.cf");
+    baseFlowchartFileTest("ifCode.cf");
   }
 
   @Test
   public void testNestedIf() throws IOException {
-    baseFlowchartTest("nestedIf.cf");
+    baseFlowchartFileTest("nestedIf.cf");
   }
 
   @Test
   public void testIfAndElse() throws IOException {
-    baseFlowchartTest("ifAndElse.cf");
+    baseFlowchartFileTest("ifAndElse.cf");
   }
 
   @Test
   public void testIfElseIf() throws IOException {
-    baseFlowchartTest("ifElseIf.cf");
+    baseFlowchartFileTest("ifElseIf.cf");
   }
 
   @Test
   public void testIfElseIfElse() throws IOException {
-    baseFlowchartTest("ifElseIfElse.cf");
+    baseFlowchartFileTest("ifElseIfElse.cf");
   }
 
   @Test
   public void testIfExample() throws IOException {
-    baseFlowchartTest("ifExample1.cf");
+    baseFlowchartFileTest("ifExample1.cf");
   }
 }

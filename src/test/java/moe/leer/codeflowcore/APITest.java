@@ -57,4 +57,9 @@ public class APITest extends BaseFlowchartTest {
 //    boolean file = gv.write(g, "graph");
   }
 
+  @Test
+  public void testExample1() {
+    baseFlowchartFileTest("binarySearch.cf");
+  }
+
 }
