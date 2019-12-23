@@ -3737,8 +3737,11 @@ public class CodeFlowParser extends Parser {
 	}
 
 	public static class ExpressionContext extends ParserRuleContext {
+		public ExpressionContext ternaryCondition;
 		public Token prefix;
 		public Token bop;
+		public ExpressionContext ternaryTrueExp;
+		public ExpressionContext ternaryFalseExp;
 		public Token postfix;
 		public FunctionCallContext functionCall() {
 			return getRuleContext(FunctionCallContext.class,0);
@@ -3791,8 +3794,8 @@ public class CodeFlowParser extends Parser {
 		public TerminalNode BITOR() { return getToken(CodeFlowParser.BITOR, 0); }
 		public TerminalNode AND() { return getToken(CodeFlowParser.AND, 0); }
 		public TerminalNode OR() { return getToken(CodeFlowParser.OR, 0); }
-		public TerminalNode COLON() { return getToken(CodeFlowParser.COLON, 0); }
 		public TerminalNode QUESTION() { return getToken(CodeFlowParser.QUESTION, 0); }
+		public TerminalNode COLON() { return getToken(CodeFlowParser.COLON, 0); }
 		public TerminalNode ASSIGN() { return getToken(CodeFlowParser.ASSIGN, 0); }
 		public TerminalNode ADD_ASSIGN() { return getToken(CodeFlowParser.ADD_ASSIGN, 0); }
 		public TerminalNode SUB_ASSIGN() { return getToken(CodeFlowParser.SUB_ASSIGN, 0); }
@@ -4137,17 +4140,19 @@ public class CodeFlowParser extends Parser {
 					case 11:
 						{
 						_localctx = new ExpressionContext(_parentctx, _parentState);
+						_localctx.ternaryCondition = _prevctx;
+						_localctx.ternaryCondition = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(594);
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
 						setState(595);
-						((ExpressionContext)_localctx).bop = match(QUESTION);
+						match(QUESTION);
 						setState(596);
-						expression(0);
+						((ExpressionContext)_localctx).ternaryTrueExp = expression(0);
 						setState(597);
 						match(COLON);
 						setState(598);
-						expression(3);
+						((ExpressionContext)_localctx).ternaryFalseExp = expression(3);
 						}
 						break;
 					case 12:

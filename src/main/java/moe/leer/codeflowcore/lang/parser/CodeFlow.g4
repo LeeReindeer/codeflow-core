@@ -189,10 +189,8 @@ statement
     | labelStmt=IDENTIFIER ':' statement // label
     | emptyStmt=SEMI
     | variableDeclarators ';'?
-//    | objectDeclarator ';'?
     | variableAssign ';'?
     | expressionStmt=expression ';'? // 表达式语句
-    // todo 三元表达式
     ;
 
 ifBlock
@@ -283,7 +281,7 @@ expression
     | expression bop='|' expression
     | expression bop='&&' expression
     | expression bop='||' expression
-    | expression bop='?' expression ':' expression
+    | ternaryCondition=expression '?' ternaryTrueExp=expression ':' ternaryFalseExp=expression //Ternary operator
     | <assoc=right> expression //所有赋值运算都是右结合，先计算右边的值
       bop=('=' | '+=' | '-=' | '*=' | '/=' | '&=' | '|=' | '^=' | '>>=' | '>>>=' | '<<=' | '%=')
       expression
