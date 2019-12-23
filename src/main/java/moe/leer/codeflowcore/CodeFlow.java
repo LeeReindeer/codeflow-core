@@ -19,6 +19,7 @@ import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.lang.semantic.SymbolDefListener;
 import moe.leer.codeflowcore.lang.semantic.SymbolResolveListener;
 import moe.leer.codeflowcore.util.NativeUtil;
+import moe.leer.codeflowcore.util.ProgramTimer;
 import moe.leer.codeflowcore.util.SomeUtil;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -57,6 +58,10 @@ public class CodeFlow {
   private MutableGraph graph;
   private CodeFlowLexer lexer;
   private CodeFlowParser parser;
+
+  private final ProgramTimer parseTimer = new ProgramTimer("parse time");
+  private final ProgramTimer checkTimer = new ProgramTimer("syntax check time");
+  private final ProgramTimer convertFlowchartTimer = new ProgramTimer("Convert flowchart time");
 
   @Getter
   @Setter
@@ -128,6 +133,7 @@ public class CodeFlow {
 
   public CodeFlow parse(@NotNull String code) {
     if (StringUtils.isNotBlank(code)) {
+      parseTimer.start();
       // init lexer and parser
       if (lexer == null) {
         if (failFast) {
@@ -150,17 +156,22 @@ public class CodeFlow {
 
       // output parse tree
       ParseTree ast = parser.program();
+      parseTimer.stopAndReport();
 
+      checkTimer.start();
 //    semanticCheck(ast);
       ParseTreeWalker walker = new ParseTreeWalker();
       SymbolDefListener symbolDefListener = new SymbolDefListener();
       walker.walk(symbolDefListener, ast);
+      checkTimer.stopAndReport();
 
+      convertFlowchartTimer.start();
       FlowchartGenVisitor visitor = new FlowchartGenVisitor();
       FlowchartFragment flowChart = visitor.visit(ast);
 
       FlowchartConnector connector = new FlowchartConnector(visitor.functionCallNodes, visitor.subFragments);
       connector.connect(flowChart.getGraph());
+      convertFlowchartTimer.stopAndReport();
       this.graph = flowChart.getGraph();
       graphviz = Graphviz.fromGraph(flowChart.getGraph()).engine(Engine.DOT);
       if (height != null) {
@@ -261,7 +272,7 @@ public class CodeFlow {
     if (!dir.endsWith("/")) {
       dir = dir + "/";
     }
-    Files.createDirectories(new File(dir).getAbsoluteFile().getParentFile().toPath());
+    Files.createDirectories(new File(dir).getAbsoluteFile().toPath());
     return dir;
   }
 
