@@ -82,6 +82,10 @@ public class FlowchartFragment {
     return types.contains(type);
   }
 
+  public boolean isMatchAllTypes(FlowchartFragmentType... testTypes) {
+    return types.size() == testTypes.length && types.containsAll(Arrays.asList(testTypes));
+  }
+
   public void setType(FlowchartFragmentType type) {
     this.types = EnumSet.of(type);
   }

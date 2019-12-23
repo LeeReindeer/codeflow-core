@@ -9,8 +9,8 @@ import lombok.Getter;
 import moe.leer.codeflowcore.FlowchartConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,6 +57,12 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     } else {
       return links().size() < 1;
     }
+  }
+
+  @NotNull
+  public String getLabelString() {
+    Label label = (Label) node.get("label");
+    return label == null ? "" : label.toString();
   }
 
   @Override

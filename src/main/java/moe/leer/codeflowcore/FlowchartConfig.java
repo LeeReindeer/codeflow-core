@@ -11,6 +11,8 @@ public final class FlowchartConfig {
 
   @Setter
   public static String functionColor = "lightblue";
+  @Setter
+  public static boolean mergeSequences = false;
   // You can set decision nodes' compass,
   // but the best you can do is not interfering the layout engine.
   // It will avoid most line intersections in graphviz.

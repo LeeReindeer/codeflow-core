@@ -1,5 +1,6 @@
 package moe.leer.codeflowcore.lang;
 
+import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.Compass;
 import moe.leer.codeflowcore.FlowchartConfig;
 import moe.leer.codeflowcore.graph.*;
@@ -39,14 +40,6 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
   public Map<String, FlowchartFragment> labeledFragments = new HashMap<>(8);
 
   public boolean isExpressionAFunctionCall(CodeFlowParser.ExpressionContext expressionContext) {
-//    boolean rst = false;
-//    if (expressionContext.expression() != null) {
-//      for (CodeFlowParser.ExpressionContext exp : expressionContext.expression()) {
-//        rst = isExpressionAFunctionCall(exp);
-//        if (rst) return rst;
-//      }
-//    }
-//    return expressionContext.functionCall() != null;
     return grepFunctionCallContext(expressionContext) != null;
   }
 
@@ -84,16 +77,29 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         if (firstFragment == null) {
           firstFragment = fragment;
         }
-        if (preFragment != null && !preFragment.isMatchType(FlowchartFragmentType.END)) {
-          preFragment.link(fragment);
-        }
         if (fragment.isMatchType(FlowchartFragmentType.BREAK)) {
           breakNodes.addAll(fragment.getBreakNodes());
         }
         if (fragment.isMatchType(FlowchartFragmentType.CONTINUE)) {
           continueNodes.addAll(fragment.getContinueNodes());
         }
-        preFragment = fragment;
+        if (preFragment != null) {
+          if (!preFragment.isMatchType(FlowchartFragmentType.END)) {
+            // merge current fragment to previous fragment while both are a single statement
+            if (FlowchartConfig.mergeSequences &&
+                preFragment.isMatchAllTypes(FlowchartFragmentType.SEQUENCE) &&
+                fragment.isMatchAllTypes(FlowchartFragmentType.SEQUENCE) &&
+                preFragment.getStops().size() == 1 && fragment.getStops().size() == 1) {
+              Label label = Label.of(preFragment.getStart().getLabelString() + "\n" + fragment.getStart().getLabelString());
+              preFragment.getStart().add(label);
+            } else {
+              preFragment.link(fragment);
+              preFragment = fragment;
+            }
+          }
+        } else {
+          preFragment = fragment;
+        }
       }
       if (firstFragment != null) {
         firstFragment.setStops(preFragment.getStops());
@@ -176,12 +182,12 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       allContinueNodes.add(continueNode);
       return continueFragment;
     } else if (ctx.gotoToken != null) {
-      throw TODO();
+      throw TODO("goto statement");
     } else if (ctx.emptyStmt != null) {
       // TODO create a invisible node
-      throw TODO();
+      throw TODO("empty statement");
     } else if (ctx.labelStmt != null) {
-      throw TODO();
+      throw TODO("label statement");
     } else if (ctx.expressionStmt != null) {
       return visitExpression(ctx.expressionStmt);
     } else { // variableDeclarators ,variableAssign
@@ -214,6 +220,8 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       CodeFlowParser.FunctionCallContext functionCallContext = grepFunctionCallContext(ctx);
       functionCallNodes.put(call, asArrayList(ParseUtil.getFunctionFullName2(functionCallContext)));
       return FlowchartFragment.create(FlowchartFragmentType.FUNCTION_CALL, call, call);
+    } else if (ctx.QUESTION() != null && ctx.COLON() != null) { //Ternary operator
+      throw TODO("Ternary operator");
     } else {
       return FlowchartFragment.singleProcess(Flowchart.processNode(ctx));
     }
