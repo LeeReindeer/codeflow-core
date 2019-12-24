@@ -89,6 +89,9 @@ CodeFlow codeFlow = CodeFlow.builder()
 All flowchart configuration is in `FlowchartConfig` as static fields.
 
 ```java
+  public static boolean virtualStartNode = true; // add a start node in graph 
+  public static boolean virtualEndNode = true;   // add a end node
+  public static boolean mergeSequences = false;  // merge non-logical relationship sequence statements
   public static String functionColor = "lightblue"; //function call node color
   // You can set decision nodes' compass,
   // but the best you can do is not interfering the layout engine.
