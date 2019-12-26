@@ -145,7 +145,7 @@ public class FlowchartFragment {
    */
   public void link(FlowchartFragment other) {
     for (FlowchartNode stop : this.stops) {
-      if (!stop.isLinkable()) continue;
+      if (!stop.isLinkable() || stop.isAbrupt()) continue;
       if (this.isMatchType(FlowchartFragmentType.DO_WHILE) &&
           stop.getType() == FlowchartNodeType.DECISION) { // special port compass for "do while" loop
         if (StringUtils.isNotBlank(FlowchartConfig.doWhileDecisionFalseCompass)) {

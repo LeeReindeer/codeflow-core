@@ -6,6 +6,8 @@ import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.MapAttributes;
 import guru.nidi.graphviz.model.*;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import moe.leer.codeflowcore.FlowchartConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +32,11 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
 
   public final MutableNode node;
   protected FlowchartNodeType type;
+
+  @Getter
+  @Setter
+  @Accessors(chain = true)
+  protected boolean abrupt; // return, throw
 
   // for condition node
   @Getter

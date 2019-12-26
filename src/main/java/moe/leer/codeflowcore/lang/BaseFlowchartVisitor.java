@@ -84,18 +84,16 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
           continueNodes.addAll(fragment.getContinueNodes());
         }
         if (preFragment != null) {
-          if (!preFragment.isMatchType(FlowchartFragmentType.END)) {
-            // merge current fragment to previous fragment while both are a single statement
-            if (FlowchartConfig.mergeSequences &&
-                preFragment.isMatchAllTypes(FlowchartFragmentType.SEQUENCE) &&
-                fragment.isMatchAllTypes(FlowchartFragmentType.SEQUENCE) &&
-                preFragment.getStops().size() == 1 && fragment.getStops().size() == 1) {
-              Label label = Label.of(preFragment.getStart().getLabelString() + "\n" + fragment.getStart().getLabelString());
-              preFragment.getStart().add(label);
-            } else {
-              preFragment.link(fragment);
-              preFragment = fragment;
-            }
+          // merge current fragment to previous fragment while both are a single statement
+          if (FlowchartConfig.mergeSequences &&
+              preFragment.isMatchAllTypes(FlowchartFragmentType.SEQUENCE) &&
+              fragment.isMatchAllTypes(FlowchartFragmentType.SEQUENCE) &&
+              preFragment.getStops().size() == 1 && fragment.getStops().size() == 1) {
+            Label label = Label.of(preFragment.getStart().getLabelString() + "\n" + fragment.getStart().getLabelString());
+            preFragment.getStart().add(label);
+          } else {
+            preFragment.link(fragment);
+            preFragment = fragment;
           }
         } else {
           preFragment = fragment;
@@ -136,7 +134,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
   }
 
   /**
-   * There're 15 cases of statement rule
+   * There're 16 cases of statement rule
    */
   @Override
   public FlowchartFragment visitStatement(CodeFlowParser.StatementContext ctx) {
@@ -154,16 +152,17 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       return visitWhileBlock(ctx.whileBlock());
     } else if (ctx.doWhileBlock() != null) {
       return visitDoWhileBlock(ctx.doWhileBlock());
-    } else if (ctx.returnToken != null) {
+    } else if (ctx.returnToken != null || ctx.throwToken != null) {
       // function call in return expression
       // todo convert tail recursion to loop
       if (isExpressionAFunctionCall(ctx.expression())) {
         FlowchartNode call = Flowchart.functionCallNode(ctx, FlowchartNodeType.END);
+        call.setAbrupt(true);
         CodeFlowParser.FunctionCallContext functionCallContext = grepFunctionCallContext(ctx.expression());
         functionCallNodes.put(call, asArrayList(ParseUtil.getFunctionFullName2(functionCallContext)));
         return FlowchartFragment.create(EnumSet.of(FlowchartFragmentType.END, FlowchartFragmentType.FUNCTION_CALL), call, call);
       } else {
-        return FlowchartFragment.create(FlowchartFragmentType.END, Flowchart.endNode(single));
+        return FlowchartFragment.create(FlowchartFragmentType.END, Flowchart.endNode(single).setAbrupt(true));
       }
     } else if (ctx.breakToken != null) {
       String where = ctx.IDENTIFIER() != null ? ctx.IDENTIFIER().getText() : "";
@@ -203,7 +202,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
           }
         }
       } else if (ctx.variableAssign() != null) {
-
+        //todo function all inc assign
       }
       return FlowchartFragment.singleProcess(Flowchart.processNode(single));
     }
@@ -215,7 +214,6 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
   @Override
   public FlowchartFragment visitExpression(CodeFlowParser.ExpressionContext ctx) {
     if (ctx.functionCall() != null) {
-//      FlowchartNode call = Flowchart.processNode(ctx).add(Color.LIGHTBLUE, Style.FILLED);
       FlowchartNode call = Flowchart.functionCallNode(ctx, FlowchartNodeType.PROCESS);
       CodeFlowParser.FunctionCallContext functionCallContext = grepFunctionCallContext(ctx);
       functionCallNodes.put(call, asArrayList(ParseUtil.getFunctionFullName2(functionCallContext)));

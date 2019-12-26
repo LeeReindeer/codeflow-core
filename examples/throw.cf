@@ -1,0 +1,8 @@
+      int a = 2;
+      if (a == 1) {
+        throw new IllegalArgumentException();
+      } else {
+        a++;
+        //return a;
+      }
+      println("a");

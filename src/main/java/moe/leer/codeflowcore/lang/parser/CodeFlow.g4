@@ -183,6 +183,7 @@ statement
     | whileBlock
     | doWhileBlock
     | returnToken=RETURN expression? ';'?
+    | throwToken=THROW expression? ';'?
     | breakToken=BREAK IDENTIFIER? ';'?
     | continueToken=CONTINUE IDENTIFIER? ';'?
     | gotoToken=GOTO IDENTIFIER ';'?
