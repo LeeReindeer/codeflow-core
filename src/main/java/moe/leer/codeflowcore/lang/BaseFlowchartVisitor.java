@@ -399,10 +399,31 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
 
   @Override
   public FlowchartFragment visitForBlock(CodeFlowParser.ForBlockContext ctx) {
-    FlowchartFragment forBlockStmtFragment = null;
+    FlowchartFragment forBlockStmtFragment;
     if (ctx.forExpressions().enhancedForExpression() != null) {
-      // todo iterator for
-      throw TODO("translate to Iterator");
+      CodeFlowParser.EnhancedForExpressionContext enhancedForCtx = ctx.forExpressions().enhancedForExpression();
+      String iteratorDefine = String.format("Iterator<%s> it = %s.iterator();",
+          ANTLRUtil.getTextFromInputStream(enhancedForCtx.variableType()),
+          ANTLRUtil.getTextFromInputStream(enhancedForCtx.expression()));
+      String entryDefine = String.format("%s %s = it.next();",
+          ANTLRUtil.getTextFromInputStream(enhancedForCtx.variableType()),
+          ANTLRUtil.getTextFromInputStream(enhancedForCtx.variableDeclaratorId()));
+      FlowchartNode iteratorDefineNode = Flowchart.processNode(iteratorDefine);
+      FlowchartNode entryDefineNode = Flowchart.processNode(entryDefine);
+
+      FlowchartNode conditionNode = Flowchart.decisionNode("it.hasNext()");
+      if (ctx.statement().block() != null) {
+        forBlockStmtFragment = visitBlockStatements(ctx.statement().block().blockStatements());
+      } else {
+        forBlockStmtFragment = visitStatement(ctx.statement());
+      }
+      forBlockStmtFragment.linkNodeAsStart(entryDefineNode);
+
+      forBlockStmtFragment.linkDecisionNodeAsTrueStart(conditionNode);
+      forBlockStmtFragment.linkDecisionNodeAsStop(conditionNode);
+      forBlockStmtFragment.linkNodeAsStart(iteratorDefineNode);
+
+      linkBreakContinueNodesInLoop(forBlockStmtFragment, conditionNode);
     } else {
       CodeFlowParser.ForInitExpContext forInitExpCtx = ctx.forExpressions().forInitExp();
       CodeFlowParser.ForConditionExpContext forConditionExpCtx = ctx.forExpressions().forConditionExp();
