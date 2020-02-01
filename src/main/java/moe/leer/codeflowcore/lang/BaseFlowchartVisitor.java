@@ -20,8 +20,7 @@ import static moe.leer.codeflowcore.exception.TodoException.TODO;
 import static moe.leer.codeflowcore.graph.Flowchart.trueLabel;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
-import static moe.leer.codeflowcore.util.SomeUtil.asArrayList;
-import static moe.leer.codeflowcore.util.SomeUtil.emptyArrayList;
+import static moe.leer.codeflowcore.util.SomeUtil.*;
 
 /**
  * @author leer
@@ -30,9 +29,10 @@ import static moe.leer.codeflowcore.util.SomeUtil.emptyArrayList;
 public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment> {
   private static Logger logger = LoggerFactory.getLogger(FlowchartFragment.class);
 
-  //  @Getter
-//  private List<FlowchartNode> functionCallNodes = new ArrayList<>();
+  // node -> function names
   public Map<FlowchartNode, List<String>> functionCallNodes = new HashMap<>(8);
+  // function name -> graph
+  public Map<String, FlowchartFragment> subFragments = new HashMap<>(8);
   // breakNode -> label, default label is empty
   public Set<FlowchartNode> allBreakNodes = new HashSet<>(8);
   public Set<FlowchartNode> allContinueNodes = new HashSet<>(8);
@@ -167,7 +167,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     } else if (ctx.breakToken != null) {
       String where = ctx.IDENTIFIER() != null ? ctx.IDENTIFIER().getText() : "";
       FlowchartNode breakNode = Flowchart.breakNode(where);
-      FlowchartFragment breakFragment = FlowchartFragment.create(FlowchartFragmentType.BREAK, breakNode, emptyArrayList());
+      FlowchartFragment breakFragment = FlowchartFragment.create(FlowchartFragmentType.BREAK, breakNode, emptyHashList());
       breakFragment.addBreakNode((BreakFlowchartNode) breakNode);
 
       allBreakNodes.add(breakNode);
@@ -175,7 +175,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     } else if (ctx.continueToken != null) {
       String where = ctx.IDENTIFIER() != null ? ctx.IDENTIFIER().getText() : "";
       FlowchartNode continueNode = Flowchart.continueNode(where);
-      FlowchartFragment continueFragment = FlowchartFragment.create(FlowchartFragmentType.CONTINUE, continueNode, emptyArrayList());
+      FlowchartFragment continueFragment = FlowchartFragment.create(FlowchartFragmentType.CONTINUE, continueNode, emptyHashList());
       continueFragment.addContinueNode((ContinueFlowchartNode) continueNode);
 
       allContinueNodes.add(continueNode);
@@ -185,7 +185,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     } else if (ctx.emptyStmt != null) {
       // TODO create a invisible node
       throw TODO("empty statement");
-    } else if (ctx.labelStmt != null) {
+    } else if (ctx.labelToken != null) {
       throw TODO("label statement");
     } else if (ctx.expressionStmt != null) {
       return visitExpression(ctx.expressionStmt);
@@ -203,6 +203,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         }
       } else if (ctx.variableAssign() != null) {
         //todo function all inc assign
+        throw TODO("variableAssign");
       }
       return FlowchartFragment.singleProcess(Flowchart.processNode(single));
     }
@@ -307,7 +308,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     if (ctx.switchCaseGroup() != null) {
       // link all switch case group
       FlowchartFragment preFragment = null, firstFragment = null;
-      Set<BreakFlowchartNode> breakNodes = new HashSet<>(4);
+      Set<FlowchartNode> breakNodes = new HashSet<>(4);
       for (CodeFlowParser.SwitchCaseGroupContext switchGroupContext : ctx.switchCaseGroup()) {
         FlowchartFragment fragment = visitSwitchCaseGroup(switchGroupContext);
         if (firstFragment == null) {
@@ -344,7 +345,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       }
       if (firstFragment != null) {
         firstFragment.setStops(preFragment.getStops());
-        firstFragment.addStopNodes(new ArrayList<>(breakNodes));
+        firstFragment.addStopNodes(breakNodes);
         // the break node is used
         // firstFragment.addBreakNodes(breakNodes);
         firstFragment.setBreakNodes(new HashSet<>(4));
@@ -437,18 +438,22 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       } else { // for block without braces
         forBlockStmtFragment = visitStatement(ctx.statement());
       }
+      // create new instance for nested loop
+      if (forBlockStmtFragment.isMatchType(FlowchartFragmentType.LOOP)) {
+        FlowchartFragment savedFragment = forBlockStmtFragment;
+        forBlockStmtFragment = FlowchartFragment.create(FlowchartFragmentType.LOOP, forBlockStmtFragment.getStart(), forBlockStmtFragment.getStops());
+      }
       forBlockStmtFragment.linkDecisionNodeAsTrueStart(conditionNode);
       forBlockStmtFragment.linkNode2Stop(updateNode);
-//      updateNode.addLink(compassLink(updateNode, Compass.EAST, conditionNode));
       updateNode.addLink(conditionNode);
-//      updateNode.addLink(conditionNode);
       forBlockStmtFragment.linkNodeAsStart(initNode);
       // normally, loop has only one stop node--the condition node
-      forBlockStmtFragment.setStops(asArrayList(conditionNode));
+      forBlockStmtFragment.setStops(asHashSet(conditionNode));
 
       linkBreakContinueNodesInLoop(forBlockStmtFragment, updateNode);
     }
-    forBlockStmtFragment.setType(FlowchartFragmentType.FOR);
+    forBlockStmtFragment.setType(FlowchartFragmentType.LOOP);
+    forBlockStmtFragment.addType(FlowchartFragmentType.FOR);
     return forBlockStmtFragment;
   }
 
@@ -463,7 +468,8 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     }
     whileFragment.linkDecisionNodeAsTrueStart(conditionNode);
     whileFragment.linkDecisionNodeAsStop(conditionNode);
-    whileFragment.setType(FlowchartFragmentType.WHILE);
+    whileFragment.setType(FlowchartFragmentType.LOOP);
+    whileFragment.addType(FlowchartFragmentType.WHILE);
 
     linkBreakContinueNodesInLoop(whileFragment, conditionNode);
     return whileFragment;
@@ -486,7 +492,8 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       );
     }
     dowhileFragemnt.linkNode2Stop(conditionNode);
-    dowhileFragemnt.setType(FlowchartFragmentType.DO_WHILE);
+    dowhileFragemnt.setType(FlowchartFragmentType.LOOP);
+    dowhileFragemnt.addType(FlowchartFragmentType.DO_WHILE);
 
     linkBreakContinueNodesInLoop(dowhileFragemnt, conditionNode);
 

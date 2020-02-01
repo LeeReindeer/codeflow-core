@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import static java.util.Arrays.asList;
 
@@ -20,8 +21,16 @@ public class SomeUtil {
     return new ArrayList<>(asList(array));
   }
 
+  public static <T> HashSet<T> asHashSet(T... array) {
+    return new HashSet<>(asList(array));
+  }
+
   public static <T> ArrayList<T> emptyArrayList() {
     return new ArrayList<>(4);
+  }
+
+  public static <T> HashSet<T> emptyHashList() {
+    return new HashSet<>(4);
   }
 
   public static File createTempFile(String prefix, String suffix) throws IOException {

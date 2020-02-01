@@ -17,12 +17,13 @@ import java.util.Map;
  * Created at 12/16/19 9:58 PM
  */
 public class FlowchartConnector {
-  public final Map<FlowchartNode, List<String>> functionCallNodes;
-  public final Map<String, FlowchartFragment> subFragments;
+  // node -> function names
+  private final Map<FlowchartNode, List<String>> functionCallNodes;
+  private final Map<String, FlowchartFragment> subFragments;
 
-  public FlowchartConnector(Map<FlowchartNode, List<String>> functionCallNodes, Map<String, FlowchartFragment> subFragments) {
-    this.functionCallNodes = functionCallNodes;
-    this.subFragments = subFragments;
+  public FlowchartConnector(BaseFlowchartVisitor visitor) {
+    this.functionCallNodes = visitor.functionCallNodes;
+    this.subFragments = visitor.subFragments;
   }
 
   public void connect(MutableGraph rootGraph) {

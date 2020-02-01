@@ -169,7 +169,7 @@ public class CodeFlow {
       FlowchartGenVisitor visitor = new FlowchartGenVisitor();
       FlowchartFragment flowChart = visitor.visit(ast);
 
-      FlowchartConnector connector = new FlowchartConnector(visitor.functionCallNodes, visitor.subFragments);
+      FlowchartConnector connector = new FlowchartConnector(visitor);
       connector.connect(flowChart.getGraph());
       convertFlowchartTimer.stopAndReport();
       this.graph = flowChart.getGraph();

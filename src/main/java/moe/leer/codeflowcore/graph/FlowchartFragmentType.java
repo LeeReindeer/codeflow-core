@@ -7,7 +7,8 @@ package moe.leer.codeflowcore.graph;
 public enum FlowchartFragmentType {
   IF,
   SWITCH,
-  FOR,
+  LOOP,
+  FOR, //loop sub type
   WHILE,
   DO_WHILE,
   BREAK,

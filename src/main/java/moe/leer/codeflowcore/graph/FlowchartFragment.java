@@ -13,7 +13,7 @@ import java.util.*;
 
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.compassLink;
 import static moe.leer.codeflowcore.graph.FlowchartNodeFactory.to;
-import static moe.leer.codeflowcore.util.SomeUtil.asArrayList;
+import static moe.leer.codeflowcore.util.SomeUtil.asHashSet;
 
 /**
  * Represent a fragment of flowchart
@@ -32,37 +32,37 @@ public class FlowchartFragment {
    * Create fragment contains only one node as both start and stop node
    */
   public static FlowchartFragment singleProcess(FlowchartNode start) {
-    return new FlowchartFragment(start, asArrayList(start), FlowchartFragmentType.SEQUENCE);
+    return new FlowchartFragment(start, asHashSet(start), FlowchartFragmentType.SEQUENCE);
   }
 
   public static FlowchartFragment create(FlowchartNode start, FlowchartNode... end) {
-    return new FlowchartFragment(start, asArrayList(end), FlowchartFragmentType.SEQUENCE);
+    return new FlowchartFragment(start, asHashSet(end), FlowchartFragmentType.SEQUENCE);
   }
 
   public static FlowchartFragment create(FlowchartFragmentType type, FlowchartNode start, FlowchartNode... end) {
-    return new FlowchartFragment(start, asArrayList(end), type);
+    return new FlowchartFragment(start, asHashSet(end), type);
   }
 
   public static FlowchartFragment create(EnumSet<FlowchartFragmentType> types, FlowchartNode start, FlowchartNode... end) {
-    return new FlowchartFragment(start, asArrayList(end), types);
+    return new FlowchartFragment(start, asHashSet(end), types);
   }
 
-  public static FlowchartFragment create(FlowchartFragmentType type, FlowchartNode start, List<FlowchartNode> ends) {
+  public static FlowchartFragment create(FlowchartFragmentType type, FlowchartNode start, Set<FlowchartNode> ends) {
     return new FlowchartFragment(start, ends, type);
   }
 
-  public FlowchartFragment(FlowchartNode start, List<FlowchartNode> stops) {
+  public FlowchartFragment(FlowchartNode start, Set<FlowchartNode> stops) {
     this.start = start;
     this.stops = stops;
   }
 
-  public FlowchartFragment(FlowchartNode start, List<FlowchartNode> stops, FlowchartFragmentType type) {
+  public FlowchartFragment(FlowchartNode start, Set<FlowchartNode> stops, FlowchartFragmentType type) {
     this.types = EnumSet.of(type);
     this.start = start;
     this.stops = stops;
   }
 
-  public FlowchartFragment(FlowchartNode start, List<FlowchartNode> stops, EnumSet<FlowchartFragmentType> type) {
+  public FlowchartFragment(FlowchartNode start, Set<FlowchartNode> stops, EnumSet<FlowchartFragmentType> type) {
     this.types = type;
     this.start = start;
     this.stops = stops;
@@ -130,13 +130,13 @@ public class FlowchartFragment {
    * A stop node here does not mean the end node in whole flowchart graph,
    * it can be an end node in whole flowchart or not.
    */
-  private List<FlowchartNode> stops = new ArrayList<>(4);
+  private Set<FlowchartNode> stops = new HashSet<>(4);
 
   public void addStopNode(FlowchartNode node) {
     stops.add(node);
   }
 
-  public void addStopNodes(List<FlowchartNode> nodes) {
+  public void addStopNodes(Set<FlowchartNode> nodes) {
     stops.addAll(nodes);
   }
 
@@ -203,7 +203,7 @@ public class FlowchartFragment {
     for (FlowchartNode stop : stops) {
       stop.addLink(decisionNode);
     }
-    this.stops = asArrayList(decisionNode);
+    this.stops = asHashSet(decisionNode);
   }
 
   public void linkNode2Stop(FlowchartNode newStop, Label linkName) {
@@ -212,7 +212,7 @@ public class FlowchartFragment {
           to(newStop).with(linkName)
       );
     }
-    this.stops = asArrayList(newStop);
+    this.stops = asHashSet(newStop);
   }
 
   public void removeStopNode(FlowchartNode stop) {
