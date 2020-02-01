@@ -187,7 +187,7 @@ statement
     | breakToken=BREAK IDENTIFIER? ';'?
     | continueToken=CONTINUE IDENTIFIER? ';'?
     | gotoToken=GOTO IDENTIFIER ';'?
-    | labelStmt=IDENTIFIER ':' statement // label
+    | labelToken=IDENTIFIER ':' statement // label
     | emptyStmt=SEMI
     | variableDeclarators ';'?
     | variableAssign ';'?

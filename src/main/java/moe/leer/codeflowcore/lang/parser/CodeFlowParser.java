@@ -1,4 +1,4 @@
-// Generated from CodeFlow.g4 by ANTLR 4.7.2
+// Generated from CodeFlow.g4 by ANTLR 4.8
 
 package moe.leer.codeflowcore.lang.parser;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class CodeFlowParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -2619,7 +2619,7 @@ public class CodeFlowParser extends Parser {
 		public Token breakToken;
 		public Token continueToken;
 		public Token gotoToken;
-		public Token labelStmt;
+		public Token labelToken;
 		public Token emptyStmt;
 		public ExpressionContext expressionStmt;
 		public BlockContext block() {
@@ -2859,7 +2859,7 @@ public class CodeFlowParser extends Parser {
 				enterOuterAlt(_localctx, 12);
 				{
 				setState(435);
-				((StatementContext)_localctx).labelStmt = match(IDENTIFIER);
+				((StatementContext)_localctx).labelToken = match(IDENTIFIER);
 				setState(436);
 				match(COLON);
 				setState(437);
