@@ -12,13 +12,15 @@ Java code to flowchart graph:
 
 - [x] Control flow in Java: sequence, loop(`for`, `while`, `do while`) and condition(`if`)
 - [x] Support `switch` statement
-- [x] Support `break`, `contuine`
-- [ ] *Support labels and `goto`
+- [x] Support `break`, `contuine` with labels
+- [x] `throw`, `return` keywords
 - [x] Top-level function and statement
 - [x] Multi-function supported, which represented in subgraphs
 - [x] Function overload(different arguments size only)
 - [x] Semantic check and warning
+- [ ] *Support `try...catch`
 - [ ] *Support Class method
+- [ ] *Support `goto`
 
 ## Quick start
 

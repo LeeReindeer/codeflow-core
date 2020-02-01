@@ -186,7 +186,10 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       // TODO create a invisible node
       throw TODO("empty statement");
     } else if (ctx.labelToken != null) {
-      throw TODO("label statement");
+      String label = ctx.labelToken.getText();
+      FlowchartFragment labeledBlock = visitStatement(ctx.statement());
+      labeledFragments.put(label, labeledBlock);
+      return labeledBlock;
     } else if (ctx.expressionStmt != null) {
       return visitExpression(ctx.expressionStmt);
     } else { // variableDeclarators ,variableAssign

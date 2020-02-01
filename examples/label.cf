@@ -1,0 +1,10 @@
+    outer:
+    for (int i = 0; i < 10; i++) {
+      inner:
+      for (int j = 0; j < 10; j++) {
+        if (j == 7) continue outer;
+        if (i == 8) continue inner;
+        if (j == 9) break outer;
+        System.out.println(j);
+      }
+    }

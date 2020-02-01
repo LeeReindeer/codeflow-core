@@ -18,7 +18,9 @@ public abstract class BaseFlowchartTest {
   @BeforeClass
   public void before() {
     FlowchartConfig.setFunctionColor("pink");
+    FlowchartConfig.virtualStartNode = true;
     FlowchartConfig.virtualEndNode = true;
+    FlowchartConfig.mergeSequences = true;
 //    FlowchartConfig.setDecisionCompass("s", "w");
     codeFlow = CodeFlow.builder()
         .failFast(true)

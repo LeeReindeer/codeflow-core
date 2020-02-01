@@ -3,18 +3,15 @@ package moe.leer.codeflowcore.lang;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.MutableGraph;
 import moe.leer.codeflowcore.FlowchartConfig;
-import moe.leer.codeflowcore.graph.Flowchart;
-import moe.leer.codeflowcore.graph.FlowchartFragment;
-import moe.leer.codeflowcore.graph.FlowchartFragmentType;
-import moe.leer.codeflowcore.graph.FlowchartNodeType;
+import moe.leer.codeflowcore.exception.SemanticErrorException;
+import moe.leer.codeflowcore.graph.*;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
 import moe.leer.codeflowcore.util.ANTLRUtil;
 import moe.leer.codeflowcore.util.ParseUtil;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static guru.nidi.graphviz.model.Factory.mutGraph;
 
@@ -40,11 +37,6 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
 //    return super.visitClassDeclaration(ctx);
 //    throw new IllegalStateException("Class/Object not supported in flowchart, cause class/object is OOP, flowchart represent a PROCESS which is POP");
 //  }
-
-
-//  private List<FlowchartFragment> subFragments = new ArrayList<>();
-  // function name -> graph
-  public Map<String, FlowchartFragment> subFragments = new HashMap<>(8);
 
   /**
    * topLevelStmts
@@ -75,6 +67,7 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
       }
     }
     if (firstFragment != null) {
+      connectLabels();
       // add a end node
       if (FlowchartConfig.virtualEndNode) {
         preFragment.linkNode2Stop(Flowchart.endNode());
@@ -89,6 +82,44 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
       rootGraph.add(firstFragment.getStart());
     }
     return root;
+  }
+
+  public void connectLabels() {
+    if (CollectionUtils.isNotEmpty(allBreakNodes)) {
+      for (FlowchartNode node : allBreakNodes) {
+        BreakFlowchartNode breakNode = (BreakFlowchartNode) node;
+        if (StringUtils.isNotEmpty(breakNode.getLabel())) {
+          FlowchartFragment fragment = labeledFragments.get(breakNode.getLabel());
+          if (fragment != null && fragment.isMatchType(FlowchartFragmentType.LOOP)) {
+            fragment.addStopNode(breakNode);
+          } else {
+            throw new SemanticErrorException("Error break label: " + breakNode.getLabel());
+          }
+        }
+      }
+    }
+
+    if (CollectionUtils.isNotEmpty(allContinueNodes)) {
+      for (FlowchartNode node : allContinueNodes) {
+        ContinueFlowchartNode continueNode = (ContinueFlowchartNode) node;
+        if (StringUtils.isNotEmpty(continueNode.getLabel())) {
+          FlowchartFragment fragment = labeledFragments.get(continueNode.getLabel());
+          if (fragment != null && fragment.isMatchType(FlowchartFragmentType.LOOP)) {
+            /*
+             * obvious that decision node is at the start node or next of the start node except the DO_WHILE loop,
+             * but have you used label in do while loops?
+             */
+            if (fragment.getStart().getType() == FlowchartNodeType.DECISION) {
+              continueNode.addLink(fragment.getStart());
+            } else {
+              continueNode.addLink(fragment.getStart().links().get(0).to());
+            }
+          } else {
+            throw new SemanticErrorException("Error continue label: " + continueNode.getLabel());
+          }
+        }
+      }
+    }
   }
 
   /**
