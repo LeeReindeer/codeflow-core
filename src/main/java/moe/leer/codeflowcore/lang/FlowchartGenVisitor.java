@@ -41,7 +41,7 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
   /**
    * topLevelStmts
    * topLevelFunctions
-   * classDeclaration
+   * classDeclaration, support parse but not present
    */
   @Override
   public FlowchartFragment visitProgram(CodeFlowParser.ProgramContext ctx) {
@@ -123,7 +123,7 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
   }
 
   /**
-   * Treat toplevel function and class method as same level, that is toplevel function and class method is at the same level of graph
+   * Add top level function to sub fragments
    */
   @Override
   public FlowchartFragment visitFunctionDeclare(CodeFlowParser.FunctionDeclareContext ctx) {

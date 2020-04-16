@@ -95,7 +95,7 @@ public class FlowchartFragment {
   }
 
   /**
-   * root graph or subgraph
+   * graph represent this flowchart fragment
    */
   private MutableGraph graph;
 

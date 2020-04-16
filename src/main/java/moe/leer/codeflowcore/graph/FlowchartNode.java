@@ -308,17 +308,20 @@ public class FlowchartNode implements MutableAttributed<FlowchartNode, ForNode>,
     return this;
   }
 
+  // use reference-equality, because the node's link will changing
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof FlowchartNode)) return false;
     FlowchartNode node1 = (FlowchartNode) o;
-    return node.equals(node1.node) &&
-        type == node1.type;
+    return node == node1.node && type == node1.type;
   }
 
+  /**
+   * hash code not change when add node link
+   */
   @Override
   public int hashCode() {
-    return Objects.hash(node, type);
+    return Objects.hash(node.attrs(), type);
   }
 }
