@@ -31,9 +31,11 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
 
   // node -> function names
   public Map<FlowchartNode, List<String>> functionCallNodes = new HashMap<>(8);
-  // function name -> graph
+  // function name -> graph, subFragments should become a field of FlowchartFragment,
+  // but only root fragment may have sub fragments, so here is ok
   public Map<String, FlowchartFragment> subFragments = new HashMap<>(8);
   // breakNode -> label, default label is empty
+  // fixme remove useless
   public Set<FlowchartNode> allBreakNodes = new HashSet<>(8);
   public Set<FlowchartNode> allContinueNodes = new HashSet<>(8);
   // label name -> block
@@ -204,9 +206,13 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
             }
           }
         }
-      } else if (ctx.variableAssign() != null) {
-        //todo function all inc assign
-        throw TODO("variableAssign");
+      } else if (ctx.variableAssign() != null &&
+          isExpressionAFunctionCall(ctx.variableAssign().variableInitializer().expression())) {
+        CodeFlowParser.VariableAssignContext varCtx = ctx.variableAssign();
+        CodeFlowParser.FunctionCallContext functionCallContext = grepFunctionCallContext(varCtx.variableInitializer().expression());
+        FlowchartNode call = Flowchart.functionCallNode(ctx, FlowchartNodeType.PROCESS);
+        functionCallNodes.put(call, asArrayList(ParseUtil.getFunctionFullName2(functionCallContext)));
+        return FlowchartFragment.create(FlowchartFragmentType.FUNCTION_CALL, call, call);
       }
       return FlowchartFragment.singleProcess(Flowchart.processNode(single));
     }
@@ -252,8 +258,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         firstFragment.addStopNode(decisionNode);
       }
     } else { // TODO optimize empty if block, remove decision node?
-      firstFragment = FlowchartFragment.create(FlowchartFragmentType.IF, decisionNode);
-      firstFragment.addStopNode(decisionNode);
+      firstFragment = FlowchartFragment.create(FlowchartFragmentType.IF, decisionNode, decisionNode);
     }
     if (isExpressionAFunctionCall(ctx.parExpression().expression())) {
       firstFragment.addType(FlowchartFragmentType.FUNCTION_CALL);
@@ -265,8 +270,10 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       // else if
       if (ctx.statement(1).ifBlock() != null) {
         FlowchartFragment elseIf = visitIfBlock(elseBranch.ifBlock());
-        firstFragment.getStart().addFalseConditionLink(elseIf.getStart());
-        firstFragment.removeStopNode(firstFragment.getStart());
+        // decision node has pointed to else if branch, remove from stops
+        decisionNode.addFalseConditionLink(elseIf.getStart());
+        firstFragment.removeStopNode(decisionNode);
+
         firstFragment.addStopNodes(elseIf.getStops());
         firstFragment.addBreakNodes(elseIf.getBreakNodes());
         firstFragment.addContinueNodes(elseIf.getContinueNodes());
@@ -432,6 +439,8 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       CodeFlowParser.ForInitExpContext forInitExpCtx = ctx.forExpressions().forInitExp();
       CodeFlowParser.ForConditionExpContext forConditionExpCtx = ctx.forExpressions().forConditionExp();
       CodeFlowParser.ForUpdateExpContext forUpdateExpCtx = ctx.forExpressions().forUpdateExp();
+      //todo forInitExpCtx, forConditionExpCtx, forUpdateExpCtx can be null,
+      // but one of the forConditionExpCtx and forUpdateExpCtx must not be null
       FlowchartNode initNode = Flowchart.processNode(forInitExpCtx);
       FlowchartNode conditionNode = Flowchart.decisionNode(forConditionExpCtx);
       FlowchartNode updateNode = Flowchart.processNode(forUpdateExpCtx);
