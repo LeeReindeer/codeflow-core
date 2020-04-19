@@ -76,6 +76,13 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       for (CodeFlowParser.BlockStatementContext context : blockStatements) {
         FlowchartFragment fragment = visitBlockStatement(context);
         logger.debug("fragment: {}", fragment);
+
+        // link labeled break and continue
+        linkLabel(fragment);
+
+        // DO NOT modify origin fragment
+        fragment = fragment.clone();
+
         if (firstFragment == null) {
           firstFragment = fragment;
         }
@@ -86,6 +93,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
           continueNodes.addAll(fragment.getContinueNodes());
         }
         if (preFragment != null) {
+          firstFragment.addTypes(preFragment.getTypes());
           // merge current fragment to previous fragment while both are a single statement
           if (FlowchartConfig.mergeSequences &&
               preFragment.isMatchAllTypes(FlowchartFragmentType.SEQUENCE) &&
@@ -102,6 +110,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         }
       }
       if (firstFragment != null) {
+        firstFragment.addTypes(preFragment.getTypes());
         firstFragment.setStops(preFragment.getStops());
         firstFragment.addBreakNodes(breakNodes);
         firstFragment.addContinueNodes(continueNodes);
@@ -115,6 +124,57 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       return firstFragment;
     }
     return null;
+  }
+
+  /**
+   * Link label node to labeled fragment before link fragment
+   *
+   * @param fragment the labeled fragment
+   */
+  private void linkLabel(FlowchartFragment fragment) {
+    if (labeledFragments.containsValue(fragment) && fragment.isMatchType(FlowchartFragmentType.LOOP)) {
+      for (FlowchartNode node : fragment.getBreakNodes()) {
+        BreakFlowchartNode breakNode = (BreakFlowchartNode) node;
+        if (!breakNode.isLinkable()) {
+          logger.warn("break node {} already linked", breakNode.getLabel());
+          continue;
+        }
+        if (StringUtils.isNotEmpty(breakNode.getLabel())) {
+          FlowchartFragment labeledFragment = labeledFragments.get(breakNode.getLabel());
+          if (labeledFragment != null && labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
+            labeledFragment.addStopNode(breakNode);
+          } else {
+            logger.warn("Unresolvable break label at current context: {}", breakNode.getLabel());
+//                  throw new SemanticErrorException("Error break label: " + breakNode.getLabel());
+          }
+        }
+      }
+
+      for (FlowchartNode node : fragment.getContinueNodes()) {
+        ContinueFlowchartNode continueNode = (ContinueFlowchartNode) node;
+        if (!continueNode.isLinkable()) {
+          logger.warn("continue node {} already linked", continueNode.getLabel());
+          continue;
+        }
+        if (StringUtils.isNotEmpty(continueNode.getLabel())) {
+          FlowchartFragment labeledFragment = labeledFragments.get(continueNode.getLabel());
+          if (labeledFragment != null && labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
+            /*
+             * obvious that decision node is at the start node or next of the start node except the DO_WHILE loop,
+             * but have you used label in do while loops?
+             */
+            if (labeledFragment.getStart().getType() == FlowchartNodeType.DECISION) {
+              continueNode.addLink(labeledFragment.getStart());
+            } else {
+              continueNode.addLink(labeledFragment.getStart().links().get(0).to());
+            }
+          } else {
+//                  throw new SemanticErrorException("Error continue label: " + continueNode.getLabel());
+            logger.warn("Unresolvable continue label at current context: {}", continueNode.getLabel());
+          }
+        }
+      }
+    }
   }
 
   @Override
@@ -133,6 +193,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
   @Override
   public FlowchartFragment visitBlockStatement(CodeFlowParser.BlockStatementContext ctx) {
     return super.visitBlockStatement(ctx);
+//    return visitStatement(ctx.statement());
   }
 
   /**
@@ -389,6 +450,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
    */
   private void linkBreakContinueNodesInLoop(@NotNull FlowchartFragment loopFragment, @NotNull FlowchartNode target) {
     if (!loopFragment.getContinueNodes().isEmpty()) {
+      loopFragment.addType(FlowchartFragmentType.BREAK);
       for (ContinueFlowchartNode continueNode : loopFragment.getContinueNodes()) {
         // the continue node is not lined yet and without label
         if (continueNode.isLinkable() &&
@@ -398,6 +460,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       }
     }
     if (!loopFragment.getBreakNodes().isEmpty()) {
+      loopFragment.addType(FlowchartFragmentType.CONTINUE);
       for (BreakFlowchartNode breakNode : loopFragment.getBreakNodes()) {
         // the break node is not lined yet and without label
         if (breakNode.isLinkable() &&
@@ -406,6 +469,19 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         }
       }
     }
+  }
+
+  /**
+   * Create new loop fragment and extend nested loop
+   *
+   * @param innerLoopFragment the nested loop
+   * @return new loop fragment contains nested loop extends it's labeled break and continue nodes
+   */
+  private FlowchartFragment createNestedLoop(FlowchartFragment innerLoopFragment) {
+    FlowchartFragment loopFragment = FlowchartFragment.create(innerLoopFragment.getTypes(), innerLoopFragment.getStart(), innerLoopFragment.getStops());
+    innerLoopFragment.getBreakNodes().stream().filter(BreakFlowchartNode::hasLabel).forEach(loopFragment::addBreakNode);
+    innerLoopFragment.getContinueNodes().stream().filter(ContinueFlowchartNode::hasLabel).forEach(loopFragment::addContinueNode);
+    return loopFragment;
   }
 
   @Override
@@ -452,8 +528,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       }
       // create new instance for nested loop
       if (forBlockStmtFragment.isMatchType(FlowchartFragmentType.LOOP)) {
-        FlowchartFragment savedFragment = forBlockStmtFragment;
-        forBlockStmtFragment = FlowchartFragment.create(FlowchartFragmentType.LOOP, forBlockStmtFragment.getStart(), forBlockStmtFragment.getStops());
+        forBlockStmtFragment = createNestedLoop(forBlockStmtFragment);
       }
       forBlockStmtFragment.linkDecisionNodeAsTrueStart(conditionNode);
       forBlockStmtFragment.linkNode2Stop(updateNode);
@@ -464,7 +539,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
 
       linkBreakContinueNodesInLoop(forBlockStmtFragment, updateNode);
     }
-    forBlockStmtFragment.setType(FlowchartFragmentType.LOOP);
+    forBlockStmtFragment.addType(FlowchartFragmentType.LOOP);
     forBlockStmtFragment.addType(FlowchartFragmentType.FOR);
     return forBlockStmtFragment;
   }
@@ -478,9 +553,14 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     } else {
       whileFragment = visitStatement(ctx.statement());
     }
+    // create new instance for nested loop
+    if (whileFragment.isMatchType(FlowchartFragmentType.LOOP)) {
+      whileFragment = createNestedLoop(whileFragment);
+    }
+
     whileFragment.linkDecisionNodeAsTrueStart(conditionNode);
     whileFragment.linkDecisionNodeAsStop(conditionNode);
-    whileFragment.setType(FlowchartFragmentType.LOOP);
+    whileFragment.addType(FlowchartFragmentType.LOOP);
     whileFragment.addType(FlowchartFragmentType.WHILE);
 
     linkBreakContinueNodesInLoop(whileFragment, conditionNode);
@@ -503,8 +583,12 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
           to(dowhileFragemnt.getStart())
       );
     }
+    // create new instance for nested loop
+    if (dowhileFragemnt.isMatchType(FlowchartFragmentType.LOOP)) {
+      dowhileFragemnt = createNestedLoop(dowhileFragemnt);
+    }
     dowhileFragemnt.linkNode2Stop(conditionNode);
-    dowhileFragemnt.setType(FlowchartFragmentType.LOOP);
+    dowhileFragemnt.addType(FlowchartFragmentType.LOOP);
     dowhileFragemnt.addType(FlowchartFragmentType.DO_WHILE);
 
     linkBreakContinueNodesInLoop(dowhileFragemnt, conditionNode);

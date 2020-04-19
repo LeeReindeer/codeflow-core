@@ -26,7 +26,7 @@ import static moe.leer.codeflowcore.util.SomeUtil.asHashSet;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FlowchartFragment {
+public class FlowchartFragment implements Cloneable {
 
   /**
    * Create fragment contains only one node as both start and stop node
@@ -49,6 +49,10 @@ public class FlowchartFragment {
 
   public static FlowchartFragment create(FlowchartFragmentType type, FlowchartNode start, Set<FlowchartNode> ends) {
     return new FlowchartFragment(start, ends, type);
+  }
+
+  public static FlowchartFragment create(EnumSet<FlowchartFragmentType> types, FlowchartNode start, Set<FlowchartNode> ends) {
+    return new FlowchartFragment(start, ends, types);
   }
 
   public FlowchartFragment(FlowchartNode start, Set<FlowchartNode> stops) {
@@ -92,6 +96,10 @@ public class FlowchartFragment {
 
   public void addType(FlowchartFragmentType type) {
     this.types.add(type);
+  }
+
+  public void addTypes(EnumSet<FlowchartFragmentType> type) {
+    this.types.addAll(type);
   }
 
   /**
@@ -217,5 +225,14 @@ public class FlowchartFragment {
 
   public void removeStopNode(FlowchartNode stop) {
     stops.remove(stop);
+  }
+
+  @Override
+  public FlowchartFragment clone() {
+    FlowchartFragment fragment = new FlowchartFragment(start, stops, types);
+    fragment.setGraph(graph);
+    fragment.setBreakNodes(breakNodes);
+    fragment.setContinueNodes(continueNodes);
+    return fragment;
   }
 }

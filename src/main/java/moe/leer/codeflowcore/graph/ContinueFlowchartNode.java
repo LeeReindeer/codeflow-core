@@ -3,6 +3,7 @@ package moe.leer.codeflowcore.graph;
 import guru.nidi.graphviz.model.MutableNode;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author leer
@@ -17,5 +18,9 @@ public class ContinueFlowchartNode extends FlowchartNode {
   public ContinueFlowchartNode(MutableNode node, String label) {
     super(node, FlowchartNodeType.PROCESS);
     this.label = label;
+  }
+
+  public boolean hasLabel() {
+    return StringUtils.isNotEmpty(label);
   }
 }
