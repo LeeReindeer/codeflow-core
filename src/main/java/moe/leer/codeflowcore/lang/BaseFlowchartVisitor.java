@@ -243,8 +243,6 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
 
       allContinueNodes.add(continueNode);
       return continueFragment;
-    } else if (ctx.gotoToken != null) {
-      throw TODO("goto statement");
     } else if (ctx.emptyStmt != null) {
       // TODO create a invisible node
       throw TODO("empty statement");

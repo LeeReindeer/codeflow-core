@@ -186,7 +186,6 @@ statement
     | throwToken=THROW expression? ';'?
     | breakToken=BREAK IDENTIFIER? ';'?
     | continueToken=CONTINUE IDENTIFIER? ';'?
-    | gotoToken=GOTO IDENTIFIER ';'?
     | labelToken=IDENTIFIER ':' statement // label
     | emptyStmt=SEMI
     | variableDeclarators ';'?
