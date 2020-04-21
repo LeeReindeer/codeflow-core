@@ -19,8 +19,6 @@ Java code to flowchart graph:
 - [x] Function overload(different arguments size only)
 - [x] Semantic check and warning
 - [ ] *Support `try...catch`
-- [ ] *Support Class method
-- [ ] *Support `goto`
 
 ## Quick start
 
