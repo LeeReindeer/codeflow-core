@@ -3,6 +3,7 @@ package moe.leer.codeflowcore.lang;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.Compass;
 import moe.leer.codeflowcore.FlowchartConfig;
+import moe.leer.codeflowcore.exception.SemanticErrorException;
 import moe.leer.codeflowcore.graph.*;
 import moe.leer.codeflowcore.lang.parser.CodeFlowBaseVisitor;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
@@ -141,11 +142,14 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         }
         if (StringUtils.isNotEmpty(breakNode.getLabel())) {
           FlowchartFragment labeledFragment = labeledFragments.get(breakNode.getLabel());
-          if (labeledFragment != null && labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
-            labeledFragment.addStopNode(breakNode);
+          if (labeledFragment != null) {
+            if (labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
+              labeledFragment.addStopNode(breakNode);
+            } else {
+              throw new SemanticErrorException("Error break label out of loop: " + breakNode.getLabel());
+            }
           } else {
             logger.warn("Unresolvable break label at current context: {}", breakNode.getLabel());
-//                  throw new SemanticErrorException("Error break label: " + breakNode.getLabel());
           }
         }
       }
@@ -158,18 +162,21 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         }
         if (StringUtils.isNotEmpty(continueNode.getLabel())) {
           FlowchartFragment labeledFragment = labeledFragments.get(continueNode.getLabel());
-          if (labeledFragment != null && labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
-            /*
-             * obvious that decision node is at the start node or next of the start node except the DO_WHILE loop,
-             * but have you used label in do while loops?
-             */
-            if (labeledFragment.getStart().getType() == FlowchartNodeType.DECISION) {
-              continueNode.addLink(labeledFragment.getStart());
+          if (labeledFragment != null) {
+            if (labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
+              /*
+               * obvious that decision node is at the start node or next of the start node except the DO_WHILE loop,
+               * but have you used label in do while loops?
+               */
+              if (labeledFragment.getStart().getType() == FlowchartNodeType.DECISION) {
+                continueNode.addLink(labeledFragment.getStart());
+              } else {
+                continueNode.addLink(labeledFragment.getStart().links().get(0).to());
+              }
             } else {
-              continueNode.addLink(labeledFragment.getStart().links().get(0).to());
+              throw new SemanticErrorException("Error continue label out of loop: " + continueNode.getLabel());
             }
           } else {
-//                  throw new SemanticErrorException("Error continue label: " + continueNode.getLabel());
             logger.warn("Unresolvable continue label at current context: {}", continueNode.getLabel());
           }
         }
@@ -204,7 +211,9 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     logger.info("visitStatement");
     String single = ANTLRUtil.getTextFromInputStream(ctx);
     if (ctx.block() != null) {
-      return super.visitStatement(ctx);
+      return visitBlockStatements(ctx.block().blockStatements());
+      // same as
+      // return super.visitStatement(ctx);
     } else if (ctx.ifBlock() != null) {
       return visitIfBlock(ctx.ifBlock());
     } else if (ctx.switchBlock() != null) {
@@ -344,16 +353,9 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
           elseBlock = visitStatement(elseBranch);
         }
 
-        Iterator<FlowchartNode> nodeIterator = firstFragment.getStops().iterator();
-        FlowchartNode stop;
-        // link decision node to else node, then remove decision from stop nodes
-        while (nodeIterator.hasNext()) {
-          stop = nodeIterator.next();
-          if (stop.getType() == FlowchartNodeType.DECISION && stop.isLinkable()) {
-            stop.addFalseConditionLink(elseBlock.getStart());
-            nodeIterator.remove();
-          }
-        }
+        decisionNode.addFalseConditionLink(elseBlock.getStart());
+        firstFragment.removeStopNode(decisionNode);
+
         firstFragment.addStopNodes(elseBlock.getStops());
         firstFragment.addBreakNodes(elseBlock.getBreakNodes());
         firstFragment.addContinueNodes(elseBlock.getContinueNodes());
