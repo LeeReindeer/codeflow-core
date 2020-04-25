@@ -9,7 +9,6 @@ import moe.leer.codeflowcore.lang.semantic.scope.FunctionSymbol;
 import moe.leer.codeflowcore.lang.semantic.scope.GlobalScope;
 import moe.leer.codeflowcore.util.ANTLRUtil;
 import moe.leer.codeflowcore.util.ParseUtil;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 /**
  * Build scope and define symbols, warning duplicated declaration
@@ -22,8 +21,8 @@ public class SymbolDefListener extends CodeFlowBaseListener {
   @Getter
   private final ScopesManager scopesManager;
 
-  public SymbolDefListener() {
-    scopesManager = new ScopesManager(new ParseTreeProperty<>());
+  public SymbolDefListener(ScopesManager scopesManager) {
+    this.scopesManager = scopesManager;
   }
 
   /**
@@ -110,4 +109,13 @@ public class SymbolDefListener extends CodeFlowBaseListener {
       }
     }
   }
+
+  @Override
+  public void exitStatement(CodeFlowParser.StatementContext ctx) {
+    if (ctx.labelToken != null) {
+      // TODO define label
+    }
+  }
+
+
 }

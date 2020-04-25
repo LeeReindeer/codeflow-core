@@ -133,7 +133,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
    * @param fragment the labeled fragment
    */
   private void linkLabel(FlowchartFragment fragment) {
-    if (labeledFragments.containsValue(fragment) && fragment.isMatchType(FlowchartFragmentType.LOOP)) {
+    if (labeledFragments.containsValue(fragment)) {
       for (FlowchartNode node : fragment.getBreakNodes()) {
         BreakFlowchartNode breakNode = (BreakFlowchartNode) node;
         if (!breakNode.isLinkable()) {
@@ -146,7 +146,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
             if (labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
               labeledFragment.addStopNode(breakNode);
             } else {
-              throw new SemanticErrorException("Error break label out of loop: " + breakNode.getLabel());
+              throw new SemanticErrorException("Not a loop label with break: " + breakNode.getLabel());
             }
           } else {
             logger.warn("Unresolvable break label at current context: {}", breakNode.getLabel());
@@ -165,6 +165,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
           if (labeledFragment != null) {
             if (labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
               /*
+               * fixme continue label in single for loop should link to forUpdate stmt
                * obvious that decision node is at the start node or next of the start node except the DO_WHILE loop,
                * but have you used label in do while loops?
                */
@@ -174,7 +175,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
                 continueNode.addLink(labeledFragment.getStart().links().get(0).to());
               }
             } else {
-              throw new SemanticErrorException("Error continue label out of loop: " + continueNode.getLabel());
+              throw new SemanticErrorException("Not a loop label with continue: " + continueNode.getLabel());
             }
           } else {
             logger.warn("Unresolvable continue label at current context: {}", continueNode.getLabel());
@@ -454,7 +455,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       for (ContinueFlowchartNode continueNode : loopFragment.getContinueNodes()) {
         // the continue node is not lined yet and without label
         if (continueNode.isLinkable() &&
-            StringUtils.isEmpty(continueNode.getLabel())) {
+            !continueNode.hasLabel()) {
           continueNode.addLink(target);
         }
       }
@@ -464,7 +465,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       for (BreakFlowchartNode breakNode : loopFragment.getBreakNodes()) {
         // the break node is not lined yet and without label
         if (breakNode.isLinkable() &&
-            StringUtils.isEmpty(breakNode.getLabel())) {
+            !breakNode.hasLabel()) {
           loopFragment.addStopNode(breakNode);
         }
       }

@@ -3,6 +3,8 @@ package moe.leer.codeflowcore.exception;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 /**
+ * Throw exception when lexer and parser occur an error
+ * <p>
  * Wrapper of <code>ParseCancellationException</code>
  *
  * @author leer

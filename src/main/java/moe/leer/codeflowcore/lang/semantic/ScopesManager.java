@@ -11,12 +11,19 @@ import moe.leer.codeflowcore.util.ANTLRUtil;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author leer
  * Created at 12/16/19 2:10 PM
  */
 public class ScopesManager {
+  private static final Logger logger = LoggerFactory.getLogger(ScopesManager.class);
+
   public final ParseTreeProperty<Scope> scopes;
   @Getter
   @Setter
@@ -24,6 +31,9 @@ public class ScopesManager {
   @Getter
   @Setter
   Scope currentScope;
+
+  @Getter
+  private final List<String> errorMessages = new ArrayList<>(4);
 
   public ScopesManager(ParseTreeProperty<Scope> scopes) {
     this.scopes = scopes;
@@ -83,6 +93,8 @@ public class ScopesManager {
   }
 
   public void error(Token t, String msg) {
-    System.out.printf("line %d:%d %s\n", t.getLine(), t.getCharPositionInLine(), msg);
+    String error = String.format("line %d:%d %s", t.getLine(), t.getCharPositionInLine(), msg);
+    errorMessages.add(error);
+    logger.error(error);
   }
 }

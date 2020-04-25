@@ -8,6 +8,8 @@ import guru.nidi.graphviz.model.MutableGraph;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import moe.leer.codeflowcore.exception.CodeFlowException;
+import moe.leer.codeflowcore.exception.SemanticErrorException;
 import moe.leer.codeflowcore.exception.SyntaxErrorException;
 import moe.leer.codeflowcore.graph.FlowchartFragment;
 import moe.leer.codeflowcore.graph.FlowchartNodeFactory;
@@ -16,6 +18,7 @@ import moe.leer.codeflowcore.lang.FlowchartGenVisitor;
 import moe.leer.codeflowcore.lang.ThrowSyntaxErrorListener;
 import moe.leer.codeflowcore.lang.parser.CodeFlowLexer;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
+import moe.leer.codeflowcore.lang.semantic.ScopesManager;
 import moe.leer.codeflowcore.lang.semantic.SymbolDefListener;
 import moe.leer.codeflowcore.lang.semantic.SymbolResolveListener;
 import moe.leer.codeflowcore.util.NativeUtil;
@@ -25,7 +28,10 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.LexerNoViableAltException;
+import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.misc.Utils;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -72,6 +78,11 @@ public class CodeFlow {
   @Accessors(chain = true)
   // throw exception when occurred syntax error
   private boolean failFast;
+  @Getter
+  @Setter
+  @Accessors(chain = true)
+  // enable symbol resolve, throw exception when symbol not resolved
+  private boolean strictMode;
 
   @Getter
   @Setter
@@ -104,9 +115,11 @@ public class CodeFlow {
   private File outFile;
 
 
-  public CodeFlow(boolean supportClass, boolean failFast, boolean useNative, Integer height, Integer width, String workDir, String outDir, Format format) {
+  public CodeFlow(boolean supportClass, boolean failFast, boolean strictMode, boolean useNative,
+                  Integer height, Integer width, String workDir, String outDir, Format format) {
     this.supportClass = supportClass;
     this.failFast = failFast;
+    this.strictMode = strictMode;
     this.useNative = useNative;
     this.height = height;
     this.width = width;
@@ -115,7 +128,7 @@ public class CodeFlow {
     this.format = format;
   }
 
-  public CodeFlow parse(@NotNull Supplier<String> supplier) {
+  public CodeFlow parse(@NotNull Supplier<String> supplier) throws CodeFlowException {
     return parse(supplier.get());
   }
 
@@ -127,70 +140,79 @@ public class CodeFlow {
 
     @Override
     public void recover(LexerNoViableAltException e) {
-      throw new SyntaxErrorException(e);
+      String symbol = "";
+      if (e.getStartIndex() >= 0 && e.getStartIndex() < this.getInputStream().size()) {
+        symbol = this.getInputStream().getText(Interval.of(e.getStartIndex(), e.getStartIndex()));
+        symbol = Utils.escapeWhitespace(symbol, false);
+      }
+      throw new SyntaxErrorException(String.format("[From Lexer] line %d:%d token recognition error at: %s", getLine(), getCharPositionInLine(), symbol), e);
     }
   }
 
-  public CodeFlow parse(@NotNull String code) {
+  public CodeFlow parse(@NotNull String code) throws CodeFlowException {
     if (StringUtils.isNotBlank(code)) {
-      parseTimer.start();
-      // init lexer and parser
-      if (lexer == null) {
-        if (failFast) {
-          lexer = new BailCodeFlowLexer(CharStreams.fromString(code));
-        } else {
-          lexer = new CodeFlowLexer(CharStreams.fromString(code));
+      try {
+        parseTimer.start();
+        // init lexer and parser
+        if (lexer == null) {
+          if (failFast) {
+            lexer = new BailCodeFlowLexer(CharStreams.fromString(code));
+          } else {
+            lexer = new CodeFlowLexer(CharStreams.fromString(code));
+          }
         }
-      }
-      lexer.setInputStream(CharStreams.fromString(code));
-      final CommonTokenStream tokens = new CommonTokenStream(lexer);
-      if (parser == null) {
-        parser = new CodeFlowParser(tokens);
-      }
-      parser.setTokenStream(tokens);
-      if (failFast) {
-        parser.removeErrorListeners();
-        parser.addErrorListener(new ThrowSyntaxErrorListener());
-      }
-      CodeFlowParser.supportClass = this.supportClass;
+        lexer.setInputStream(CharStreams.fromString(code));
+        final CommonTokenStream tokens = new CommonTokenStream(lexer);
+        if (parser == null) {
+          parser = new CodeFlowParser(tokens);
+        }
+        parser.setTokenStream(tokens);
+        if (failFast) {
+          parser.removeErrorListeners();
+          parser.addErrorListener(new ThrowSyntaxErrorListener());
+        }
+        CodeFlowParser.supportClass = this.supportClass;
 
-      // output parse tree
-      ParseTree ast = parser.program();
-      parseTimer.stopAndReport();
+        // output parse tree
+        ParseTree ast = parser.program();
+        parseTimer.stopAndReport();
 
-      checkTimer.start();
-//    semanticCheck(ast);
-      ParseTreeWalker walker = new ParseTreeWalker();
-      SymbolDefListener symbolDefListener = new SymbolDefListener();
-      walker.walk(symbolDefListener, ast);
-      checkTimer.stopAndReport();
+        checkTimer.start();
+        semanticCheck(ast);
+//      ParseTreeWalker walker = new ParseTreeWalker();
+//      SymbolDefListener symbolDefListener = new SymbolDefListener();
+//      walker.walk(symbolDefListener, ast);
+        checkTimer.stopAndReport();
 
-      convertFlowchartTimer.start();
-      FlowchartGenVisitor visitor = new FlowchartGenVisitor();
-      FlowchartFragment flowChart = visitor.visit(ast);
+        convertFlowchartTimer.start();
+        FlowchartGenVisitor visitor = new FlowchartGenVisitor();
+        FlowchartFragment flowChart = visitor.visit(ast);
 
-      FlowchartConnector connector = new FlowchartConnector(visitor);
-      connector.connect(flowChart.getGraph());
-      convertFlowchartTimer.stopAndReport();
-      this.graph = flowChart.getGraph();
-      graphviz = Graphviz.fromGraph(flowChart.getGraph()).engine(Engine.DOT);
-      if (height != null) {
-        graphviz = graphviz.height(height);
-      }
-      if (width != null) {
-        graphviz = graphviz.width(width);
+        FlowchartConnector connector = new FlowchartConnector(visitor);
+        connector.connect(flowChart.getGraph());
+        convertFlowchartTimer.stopAndReport();
+        this.graph = flowChart.getGraph();
+        graphviz = Graphviz.fromGraph(flowChart.getGraph()).engine(Engine.DOT);
+        if (height != null) {
+          graphviz = graphviz.height(height);
+        }
+        if (width != null) {
+          graphviz = graphviz.width(width);
+        }
+      } catch (Throwable t) {
+        throw new CodeFlowException(t);
       }
     }
     return this;
   }
 
-  public CodeFlow parse(@NotNull File file) throws IOException {
+  public CodeFlow parse(@NotNull File file) throws IOException, CodeFlowException {
     try (final InputStream in = new FileInputStream(getAndCreateDir(workDir) + file.getPath())) {
       return parse(IOUtils.toString(in));
     }
   }
 
-  public CodeFlow parseFile(@NotNull String path) throws IOException {
+  public CodeFlow parseFile(@NotNull String path) throws IOException, CodeFlowException {
     try (final InputStream in = new FileInputStream(getAndCreateDir(workDir) + path)) {
       return parse(IOUtils.toString(in));
     }
@@ -276,19 +298,24 @@ public class CodeFlow {
     return dir;
   }
 
-  private void semanticCheck(ParseTree tree) {
+  private void semanticCheck(ParseTree tree) throws SemanticErrorException {
     ParseTreeWalker walker = new ParseTreeWalker();
-    SymbolDefListener symbolDefListener = new SymbolDefListener();
+    ScopesManager scopesManager = new ScopesManager(new ParseTreeProperty<>());
+    SymbolDefListener symbolDefListener = new SymbolDefListener(scopesManager);
 
     walker.walk(symbolDefListener, tree);
-    System.out.println(symbolDefListener.getScopesManager().getGlobalScope());
+    logger.debug(symbolDefListener.getScopesManager().getGlobalScope().toString());
 
     // evaluate expression, fall type mismatched
 //    EvaluateSymbolListener evaluateSymbolListener = new EvaluateSymbolListener(symbolDefListener.scopes, symbolDefListener.getGlobalScope());
 //    walker.walk(evaluateSymbolListener, tree);
-
-    SymbolResolveListener symbolResolveListener = new SymbolResolveListener(symbolDefListener.getScopesManager().scopes, symbolDefListener.getScopesManager().getGlobalScope());
-    walker.walk(symbolResolveListener, tree);
+    if (strictMode) {
+      SymbolResolveListener symbolResolveListener = new SymbolResolveListener(scopesManager);
+      walker.walk(symbolResolveListener, tree);
+    }
+    if (!scopesManager.getErrorMessages().isEmpty()) {
+      throw new SemanticErrorException(String.join("\n", scopesManager.getErrorMessages()));
+    }
   }
 
   public static CodeFlowBuilder builder() {
@@ -299,6 +326,7 @@ public class CodeFlow {
   public static class CodeFlowBuilder {
     private boolean supportClass;
     private boolean failFast;
+    private boolean strictMode;
     private boolean useNative;
     private Integer height;
     private Integer width;
@@ -316,6 +344,11 @@ public class CodeFlow {
 
     public CodeFlow.CodeFlowBuilder failFast(boolean failFast) {
       this.failFast = failFast;
+      return this;
+    }
+
+    public CodeFlow.CodeFlowBuilder strictMode(boolean strictMode) {
+      this.strictMode = strictMode;
       return this;
     }
 
@@ -350,7 +383,7 @@ public class CodeFlow {
     }
 
     public CodeFlow build() {
-      return new CodeFlow(this.supportClass, this.failFast, this.useNative, this.height, this.width, this.workDir, this.outDir, this.format);
+      return new CodeFlow(this.supportClass, this.failFast, this.strictMode, this.useNative, this.height, this.width, this.workDir, this.outDir, this.format);
     }
 
     public String toString() {

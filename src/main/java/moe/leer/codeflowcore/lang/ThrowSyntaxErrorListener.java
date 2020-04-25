@@ -15,6 +15,6 @@ public class ThrowSyntaxErrorListener extends BaseErrorListener {
   @Override
   public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
       throws SyntaxErrorException {
-    throw new SyntaxErrorException("line " + line + ":" + charPositionInLine + ": " + msg, e);
+    throw new SyntaxErrorException("[From Parser] line " + line + ":" + charPositionInLine + ": " + msg, e);
   }
 }

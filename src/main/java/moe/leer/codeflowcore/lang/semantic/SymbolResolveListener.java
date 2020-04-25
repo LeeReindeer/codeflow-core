@@ -10,9 +10,6 @@ import moe.leer.codeflowcore.util.ANTLRUtil;
 import moe.leer.codeflowcore.util.ParseUtil;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author leer
  * Created at 12/16/19 1:04 PM
@@ -21,11 +18,13 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
 
   @Getter
   private ScopesManager scopesManager;
-  @Getter
-  private List<String> errorMessages = new ArrayList<>(4);
 
   public SymbolResolveListener(ParseTreeProperty<Scope> scopes, GlobalScope globalScope) {
     scopesManager = new ScopesManager(scopes, globalScope);
+  }
+
+  public SymbolResolveListener(ScopesManager scopesManager) {
+    this.scopesManager = scopesManager;
   }
 
   public void enterProgram(CodeFlowParser.ProgramContext ctx) {
@@ -67,7 +66,6 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
     Symbol var = scopesManager.resolve(name);
     if (var == null) {
       String error = "no such variable: " + name;
-      errorMessages.add(error);
       scopesManager.error(ctx.variableId.getStart(), error);
     }
   }
@@ -85,7 +83,6 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
       Symbol func = scopesManager.resolveFunction(functionName);
       if (func == null) {
         String error = "no such function: " + functionName;
-        errorMessages.add(error);
         scopesManager.error(ctx.functionCallName().getStart(), error);
       }
     }
@@ -101,7 +98,6 @@ public class SymbolResolveListener extends CodeFlowBaseListener {
     Symbol var = scopesManager.resolve(name);
     if (var == null) {
       String error = "no such variable: " + name;
-      errorMessages.add(error);
       scopesManager.error(ctx.getStart(), error);
     }
   }
