@@ -72,8 +72,13 @@ public class Flowchart {
   }
 
   public static FlowchartNode functionCallNode(String exp, FlowchartNodeType type) {
-    return uniqueFcNode(exp, type)
-        .add(getShape(type), Color.named(FlowchartConfig.functionColor), Style.FILLED);
+    Shape shape = getShape(type);
+    FlowchartNode node = uniqueFcNode(exp, type)
+        .add(shape, Color.named(FlowchartConfig.functionColor), Style.FILLED);
+    if (type == FlowchartNodeType.END) {
+      node.add(Style.ROUNDED.and(Style.FILLED));
+    }
+    return node;
   }
 
   public static FlowchartNode functionCallNode(ParserRuleContext context, FlowchartNodeType type) {
@@ -130,7 +135,7 @@ public class Flowchart {
     switch (type) {
       case START:
       case END:
-        return Shape.ELLIPSE; // default shape
+        return Shape.RECTANGLE; // SHOULD ADD ROUNDED STYLE
       case PROCESS:
         return Shape.RECTANGLE;
       case DECISION:
