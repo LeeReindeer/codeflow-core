@@ -3,7 +3,6 @@ package moe.leer.codeflowcore.lang;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.model.Compass;
 import moe.leer.codeflowcore.FlowchartConfig;
-import moe.leer.codeflowcore.exception.SemanticErrorException;
 import moe.leer.codeflowcore.graph.*;
 import moe.leer.codeflowcore.lang.parser.CodeFlowBaseVisitor;
 import moe.leer.codeflowcore.lang.parser.CodeFlowParser;
@@ -35,10 +34,8 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
   // function name -> graph, subFragments should become a field of FlowchartFragment,
   // but only root fragment may have sub fragments, so here is ok
   public Map<String, FlowchartFragment> subFragments = new HashMap<>(8);
-  // breakNode -> label, default label is empty
+
   // fixme remove useless
-  public Set<FlowchartNode> allBreakNodes = new HashSet<>(8);
-  public Set<FlowchartNode> allContinueNodes = new HashSet<>(8);
   // label name -> block
   public Map<String, FlowchartFragment> labeledFragments = new HashMap<>(8);
 
@@ -77,9 +74,6 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       for (CodeFlowParser.BlockStatementContext context : blockStatements) {
         FlowchartFragment fragment = visitBlockStatement(context);
         logger.debug("fragment: {}", fragment);
-
-        // link labeled break and continue
-        linkLabel(fragment);
 
         // DO NOT modify origin fragment
         fragment = fragment.clone();
@@ -125,64 +119,6 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       return firstFragment;
     }
     return null;
-  }
-
-  /**
-   * Link label node to labeled fragment before link fragment
-   *
-   * @param fragment the labeled fragment
-   */
-  private void linkLabel(FlowchartFragment fragment) {
-    if (labeledFragments.containsValue(fragment)) {
-      for (FlowchartNode node : fragment.getBreakNodes()) {
-        BreakFlowchartNode breakNode = (BreakFlowchartNode) node;
-        if (!breakNode.isLinkable()) {
-          logger.warn("break node {} already linked", breakNode.getLabel());
-          continue;
-        }
-        if (StringUtils.isNotEmpty(breakNode.getLabel())) {
-          FlowchartFragment labeledFragment = labeledFragments.get(breakNode.getLabel());
-          if (labeledFragment != null) {
-            if (labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
-              labeledFragment.addStopNode(breakNode);
-            } else {
-              throw new SemanticErrorException("Not a loop label with break: " + breakNode.getLabel());
-            }
-          } else {
-            logger.warn("Unresolvable break label at current context: {}", breakNode.getLabel());
-          }
-        }
-      }
-
-      for (FlowchartNode node : fragment.getContinueNodes()) {
-        ContinueFlowchartNode continueNode = (ContinueFlowchartNode) node;
-        if (!continueNode.isLinkable()) {
-          logger.warn("continue node {} already linked", continueNode.getLabel());
-          continue;
-        }
-        if (StringUtils.isNotEmpty(continueNode.getLabel())) {
-          FlowchartFragment labeledFragment = labeledFragments.get(continueNode.getLabel());
-          if (labeledFragment != null) {
-            if (labeledFragment.isMatchType(FlowchartFragmentType.LOOP)) {
-              /*
-               * fixme continue label in single for loop should link to forUpdate stmt
-               * obvious that decision node is at the start node or next of the start node except the DO_WHILE loop,
-               * but have you used label in do while loops?
-               */
-              if (labeledFragment.getStart().getType() == FlowchartNodeType.DECISION) {
-                continueNode.addLink(labeledFragment.getStart());
-              } else {
-                continueNode.addLink(labeledFragment.getStart().links().get(0).to());
-              }
-            } else {
-              throw new SemanticErrorException("Not a loop label with continue: " + continueNode.getLabel());
-            }
-          } else {
-            logger.warn("Unresolvable continue label at current context: {}", continueNode.getLabel());
-          }
-        }
-      }
-    }
   }
 
   @Override
@@ -242,16 +178,12 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       FlowchartNode breakNode = Flowchart.breakNode(where);
       FlowchartFragment breakFragment = FlowchartFragment.create(FlowchartFragmentType.BREAK, breakNode, emptyHashList());
       breakFragment.addBreakNode((BreakFlowchartNode) breakNode);
-
-      allBreakNodes.add(breakNode);
       return breakFragment;
     } else if (ctx.continueToken != null) {
       String where = ctx.IDENTIFIER() != null ? ctx.IDENTIFIER().getText() : "";
       FlowchartNode continueNode = Flowchart.continueNode(where);
       FlowchartFragment continueFragment = FlowchartFragment.create(FlowchartFragmentType.CONTINUE, continueNode, emptyHashList());
       continueFragment.addContinueNode((ContinueFlowchartNode) continueNode);
-
-      allContinueNodes.add(continueNode);
       return continueFragment;
     } else if (ctx.emptyStmt != null) {
       // TODO create a invisible node
@@ -445,28 +377,31 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
   }
 
   /**
-   * Link continue and break statement without label in loop fragment:
-   * 1. the continue node is link with <code>target</code> node
+   * Link continue and break statement in loop fragment:
+   * 1. the continue node((without label)) is link with <code>target</code> node
    * 2. the break node(without label) is treated as stop node, which will be linked in <code>linkStatements()</code>
+   * 3. continue and break nodes with label are linked when its label equals current loop's label
    */
-  private void linkBreakContinueNodesInLoop(@NotNull FlowchartFragment loopFragment, @NotNull FlowchartNode target) {
+  private void linkBreakContinueNodesInLoop(@NotNull FlowchartFragment loopFragment, @NotNull FlowchartNode target,
+                                            @NotNull String currentLabel) {
     if (!loopFragment.getContinueNodes().isEmpty()) {
       loopFragment.addType(FlowchartFragmentType.BREAK);
       for (ContinueFlowchartNode continueNode : loopFragment.getContinueNodes()) {
-        // the continue node is not lined yet and without label
-        if (continueNode.isLinkable() &&
-            !continueNode.hasLabel()) {
-          continueNode.addLink(target);
+        // the continue node is not lined yet and is without label or equals current label
+        if (continueNode.isLinkable()) {
+          if (!continueNode.hasLabel() || continueNode.getLabel().equals(currentLabel)) {
+            continueNode.addLink(target);
+          }
         }
       }
     }
     if (!loopFragment.getBreakNodes().isEmpty()) {
       loopFragment.addType(FlowchartFragmentType.CONTINUE);
       for (BreakFlowchartNode breakNode : loopFragment.getBreakNodes()) {
-        // the break node is not lined yet and without label
-        if (breakNode.isLinkable() &&
-            !breakNode.hasLabel()) {
-          loopFragment.addStopNode(breakNode);
+        // the break node is not lined yet and is without label or equals current label
+        if (breakNode.isLinkable()) {
+          if (!breakNode.hasLabel() || breakNode.getLabel().equals(currentLabel))
+            loopFragment.addStopNode(breakNode);
         }
       }
     }
@@ -485,8 +420,23 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     return loopFragment;
   }
 
+  private String getCurrentLabel(ParserRuleContext ctx) {
+    String currentLabel = "";
+    if (ctx.parent != null && ctx.parent.parent instanceof CodeFlowParser.StatementContext) {
+      CodeFlowParser.StatementContext stmt = (CodeFlowParser.StatementContext) ctx.parent.parent;
+      if (stmt.labelToken != null) {
+        System.out.println("label: " + stmt.labelToken.getText());
+        currentLabel = stmt.labelToken.getText();
+      }
+    }
+    return currentLabel;
+  }
+
   @Override
   public FlowchartFragment visitForBlock(CodeFlowParser.ForBlockContext ctx) {
+//    System.out.println(ctx.parent.getClass().getName());
+    String currentLabel = getCurrentLabel(ctx);
+
     FlowchartFragment forBlockStmtFragment;
     if (ctx.forExpressions().enhancedForExpression() != null) {
       CodeFlowParser.EnhancedForExpressionContext enhancedForCtx = ctx.forExpressions().enhancedForExpression();
@@ -511,7 +461,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       forBlockStmtFragment.linkDecisionNodeAsStop(conditionNode);
       forBlockStmtFragment.linkNodeAsStart(iteratorDefineNode);
 
-      linkBreakContinueNodesInLoop(forBlockStmtFragment, conditionNode);
+      linkBreakContinueNodesInLoop(forBlockStmtFragment, conditionNode, currentLabel);
     } else {
       CodeFlowParser.ForInitExpContext forInitExpCtx = ctx.forExpressions().forInitExp();
       CodeFlowParser.ForConditionExpContext forConditionExpCtx = ctx.forExpressions().forConditionExp();
@@ -538,7 +488,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
       // normally, loop has only one stop node--the condition node
       forBlockStmtFragment.setStops(asHashSet(conditionNode));
 
-      linkBreakContinueNodesInLoop(forBlockStmtFragment, updateNode);
+      linkBreakContinueNodesInLoop(forBlockStmtFragment, updateNode, currentLabel);
     }
     forBlockStmtFragment.addType(FlowchartFragmentType.LOOP);
     forBlockStmtFragment.addType(FlowchartFragmentType.FOR);
@@ -547,6 +497,8 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
 
   @Override
   public FlowchartFragment visitWhileBlock(CodeFlowParser.WhileBlockContext ctx) {
+    String currentLabel = getCurrentLabel(ctx);
+
     FlowchartFragment whileFragment = null;
     FlowchartNode conditionNode = Flowchart.decisionNode(ctx.parExpression().expression());
     if (ctx.statement().block() != null) {
@@ -564,12 +516,14 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     whileFragment.addType(FlowchartFragmentType.LOOP);
     whileFragment.addType(FlowchartFragmentType.WHILE);
 
-    linkBreakContinueNodesInLoop(whileFragment, conditionNode);
+    linkBreakContinueNodesInLoop(whileFragment, conditionNode, currentLabel);
     return whileFragment;
   }
 
   @Override
   public FlowchartFragment visitDoWhileBlock(CodeFlowParser.DoWhileBlockContext ctx) {
+    String currentLabel = getCurrentLabel(ctx);
+
     FlowchartFragment dowhileFragemnt;
     FlowchartNode conditionNode = Flowchart.decisionNode(ctx.parExpression().expression());
     dowhileFragemnt = visitBlockStatements(ctx.block().blockStatements());
@@ -592,7 +546,7 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
     dowhileFragemnt.addType(FlowchartFragmentType.LOOP);
     dowhileFragemnt.addType(FlowchartFragmentType.DO_WHILE);
 
-    linkBreakContinueNodesInLoop(dowhileFragemnt, conditionNode);
+    linkBreakContinueNodesInLoop(dowhileFragemnt, conditionNode, currentLabel);
 
     return dowhileFragemnt;
   }
