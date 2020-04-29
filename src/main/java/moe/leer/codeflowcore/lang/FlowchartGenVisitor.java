@@ -93,8 +93,13 @@ public class FlowchartGenVisitor extends BaseFlowchartVisitor {
     if (ctx.functionBody().block().blockStatements() != null) {
       FlowchartFragment functionBody = super.visitBlockStatements(ctx.functionBody().block().blockStatements());
       // add a start node, function has a start node by default, not by configuration
-      if (functionBody.getStart().getType() != FlowchartNodeType.START) {
-        functionBody.linkNodeAsStart(Flowchart.startNode());
+      if (functionBody != null) {
+        if (functionBody.getStart().getType() != FlowchartNodeType.START) {
+          functionBody.linkNodeAsStart(Flowchart.startNode());
+        }
+      } else {
+        // empty function body
+        functionBody = FlowchartFragment.create(Flowchart.startNode());
       }
       String functionDisplayName = ctx.IDENTIFIER().getText() + ANTLRUtil.getTextFromInputStream(ctx.formalParams());
       String functionFullName = ParseUtil.getFunctionFullName2(ctx);
