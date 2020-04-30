@@ -284,6 +284,15 @@ public class CodeFlow {
     }
   }
 
+  /**
+   * Ignore Format config, return DOT string
+   *
+   * @return DOT language
+   */
+  public String toDOT() {
+    return this.graph.toString();
+  }
+
   private boolean renderWithNativeLibrary(String dotString, String format, String filename) {
     SWIGTYPE_p_Agraph_t g = gv.readstring(dotString);
     gv.layout(g, "dot");
