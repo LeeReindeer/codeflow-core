@@ -243,26 +243,26 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
 
     CodeFlowParser.StatementContext statementContext = ctx.statement(0);
     // if branch, recursively support nesting other blocks
-    FlowchartFragment firstFragment;
+    FlowchartFragment ifFragment;
     // if block
     if (statementContext.block() != null && statementContext.block().blockStatements() != null) {
-      firstFragment = visitBlockStatements(statementContext.block().blockStatements());
+      ifFragment = visitBlockStatements(statementContext.block().blockStatements());
     } else { // single if statement without braces
-      firstFragment = visitStatement(statementContext);
+      ifFragment = visitStatement(statementContext);
     }
     // link decision node as start
-    if (firstFragment != null) {
-      firstFragment.linkDecisionNodeAsTrueStart(decisionNode);
-      firstFragment.addType(FlowchartFragmentType.IF);
+    if (ifFragment != null) {
+      ifFragment.linkDecisionNodeAsTrueStart(decisionNode);
+      ifFragment.addType(FlowchartFragmentType.IF);
       // fixme decision is also a end node
       if (decisionNode.isLinkable()) {
-        firstFragment.addStopNode(decisionNode);
+        ifFragment.addStopNode(decisionNode);
       }
     } else { // TODO optimize empty if block, remove decision node?
-      firstFragment = FlowchartFragment.create(FlowchartFragmentType.IF, decisionNode, decisionNode);
+      ifFragment = FlowchartFragment.create(FlowchartFragmentType.IF, decisionNode, decisionNode);
     }
     if (isExpressionAFunctionCall(ctx.parExpression().expression())) {
-      firstFragment.addType(FlowchartFragmentType.FUNCTION_CALL);
+      ifFragment.addType(FlowchartFragmentType.FUNCTION_CALL);
     }
 
     // else branch
@@ -273,11 +273,11 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         FlowchartFragment elseIf = visitIfBlock(elseBranch.ifBlock());
         // decision node has pointed to else if branch, remove from stops
         decisionNode.addFalseConditionLink(elseIf.getStart());
-        firstFragment.removeStopNode(decisionNode);
+        ifFragment.removeStopNode(decisionNode);
 
-        firstFragment.addStopNodes(elseIf.getStops());
-        firstFragment.addBreakNodes(elseIf.getBreakNodes());
-        firstFragment.addContinueNodes(elseIf.getContinueNodes());
+        ifFragment.addStopNodes(elseIf.getStops());
+        ifFragment.addBreakNodes(elseIf.getBreakNodes());
+        ifFragment.addContinueNodes(elseIf.getContinueNodes());
       } else { // else
         FlowchartFragment elseBlock;
         if (elseBranch.block() != null) {
@@ -287,21 +287,21 @@ public class BaseFlowchartVisitor extends CodeFlowBaseVisitor<FlowchartFragment>
         }
 
         decisionNode.addFalseConditionLink(elseBlock.getStart());
-        firstFragment.removeStopNode(decisionNode);
+        ifFragment.removeStopNode(decisionNode);
 
-        firstFragment.addStopNodes(elseBlock.getStops());
-        firstFragment.addBreakNodes(elseBlock.getBreakNodes());
-        firstFragment.addContinueNodes(elseBlock.getContinueNodes());
+        ifFragment.addStopNodes(elseBlock.getStops());
+        ifFragment.addBreakNodes(elseBlock.getBreakNodes());
+        ifFragment.addContinueNodes(elseBlock.getContinueNodes());
       }
     }
-    if (!firstFragment.getBreakNodes().isEmpty()) {
-      firstFragment.addType(FlowchartFragmentType.BREAK);
+    if (!ifFragment.getBreakNodes().isEmpty()) {
+      ifFragment.addType(FlowchartFragmentType.BREAK);
     }
-    if (!firstFragment.getContinueNodes().isEmpty()) {
-      firstFragment.addType(FlowchartFragmentType.CONTINUE);
+    if (!ifFragment.getContinueNodes().isEmpty()) {
+      ifFragment.addType(FlowchartFragmentType.CONTINUE);
     }
-    logger.debug("ifFragment: {}", firstFragment);
-    return firstFragment;
+    logger.debug("ifFragment: {}", ifFragment);
+    return ifFragment;
   }
 
   private String switchConditionPrefix;
