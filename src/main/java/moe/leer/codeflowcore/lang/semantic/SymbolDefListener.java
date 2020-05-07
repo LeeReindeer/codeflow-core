@@ -56,6 +56,22 @@ public class SymbolDefListener extends CodeFlowBaseListener {
   }
 
   @Override
+  public void enterForBlock(CodeFlowParser.ForBlockContext ctx) {
+    BlockScope blockScope = new BlockScope(scopesManager.currentScope) {
+      @Override
+      public String getScopeName() {
+        return "forBlock";
+      }
+    };
+    scopesManager.enterAndSaveScope(ctx, blockScope);
+  }
+
+  @Override
+  public void exitForBlock(CodeFlowParser.ForBlockContext ctx) {
+    scopesManager.leaveScope();
+  }
+
+  @Override
   public void enterFunctionDeclare(CodeFlowParser.FunctionDeclareContext ctx) {
     String type = ParseUtil.getFunctionType(ctx);
     //todo function overload
