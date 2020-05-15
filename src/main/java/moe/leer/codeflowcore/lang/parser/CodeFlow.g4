@@ -92,7 +92,7 @@ qualifiedNameList
 
 // generic type no wildcard
 typeArguments
-    :   '<' typeArgument (',' typeArgument)* '>'
+    :   '<' typeArgument? (',' typeArgument)* '>'
     ;
 
 typeArgument
@@ -273,7 +273,7 @@ expression
     | '(' variableType ')' expression // type convert
     | expression bop=('*'|'/'|'%') expression
     | expression bop=('+'|'-') expression
-    | expression ('<' '<' | '>' '>' '>' | '>' '>') expression // <<, >>>, >>
+    | expression shiftOp expression // <<, >>>, >>
     | expression bop=('<=' | '>=' | '>' | '<') expression
     | expression bop=('==' | '!=') expression
     | expression bop='&' expression
@@ -367,6 +367,13 @@ primitiveType
 primary
     : literal
     | IDENTIFIER
+    ;
+
+// https://stackoverflow.com/questions/24236798/how-do-i-correctly-parse-generic-types-with-antlr
+shiftOp
+    :   '<' '<'
+    |   '>' '>' '>'
+    |   '>' '>'
     ;
 
 literal

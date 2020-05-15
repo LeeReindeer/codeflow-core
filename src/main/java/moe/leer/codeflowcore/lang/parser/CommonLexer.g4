@@ -121,9 +121,10 @@
  BITAND:             '&';
  BITOR:              '|';
  CARET:              '^';
- LSHIFT:             '<<';
- RSHIFT:             '>>';
- URSHIFT:            '>>>';
+ //https://stackoverflow.com/questions/24236798/how-do-i-correctly-parse-generic-types-with-antlr
+// LSHIFT:             '<<';
+// RSHIFT:             '>>';
+// URSHIFT:            '>>>';
 
  ASSIGN:             '=';
  ADD_ASSIGN:         '+=';

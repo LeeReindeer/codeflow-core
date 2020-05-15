@@ -798,6 +798,18 @@ public class CodeFlowBaseListener implements CodeFlowListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterShiftOp(CodeFlowParser.ShiftOpContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShiftOp(CodeFlowParser.ShiftOpContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterLiteral(CodeFlowParser.LiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}

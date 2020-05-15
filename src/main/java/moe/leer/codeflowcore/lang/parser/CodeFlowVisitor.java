@@ -403,6 +403,12 @@ public interface CodeFlowVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrimary(CodeFlowParser.PrimaryContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CodeFlowParser#shiftOp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitShiftOp(CodeFlowParser.ShiftOpContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link CodeFlowParser#literal}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

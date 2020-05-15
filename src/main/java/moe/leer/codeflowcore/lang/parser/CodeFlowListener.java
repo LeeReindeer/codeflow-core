@@ -660,6 +660,16 @@ public interface CodeFlowListener extends ParseTreeListener {
 	 */
 	void exitPrimary(CodeFlowParser.PrimaryContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link CodeFlowParser#shiftOp}.
+	 * @param ctx the parse tree
+	 */
+	void enterShiftOp(CodeFlowParser.ShiftOpContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link CodeFlowParser#shiftOp}.
+	 * @param ctx the parse tree
+	 */
+	void exitShiftOp(CodeFlowParser.ShiftOpContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link CodeFlowParser#literal}.
 	 * @param ctx the parse tree
 	 */
