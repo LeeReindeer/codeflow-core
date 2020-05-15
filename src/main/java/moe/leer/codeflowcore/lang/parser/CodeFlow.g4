@@ -202,7 +202,7 @@ ifBlock
 switchBlock
     : SWITCH parExpression '{'
       switchCaseGroup*
-      DEFAULT ':' defaultStmt=blockStatements
+      (DEFAULT ':' defaultStmt=blockStatements)?
     '}'
     ;
 
@@ -264,7 +264,7 @@ expression
     | variableRef
     | functionCall '.' variableRef   // example: nodes().size;
     | primary
-    | expression '[' expression ']' // array
+    | expression '[' expression ']' (DOT IDENTIFIER)? // array
     | '(' expression ')'
     | NEW creator
     | expression postfix=('++'|'--')
