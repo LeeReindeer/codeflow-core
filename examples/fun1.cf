@@ -1,0 +1,5 @@
+a();
+
+void a() {
+  println("call a");
+}

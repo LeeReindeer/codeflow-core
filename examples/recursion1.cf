@@ -1,0 +1,11 @@
+  private double pow(double x, int n) {
+    if (n <= 0) return 1;
+    double half;
+    if ((n & 1) == 0) {
+      half = pow(x, n / 2);
+      return half * half;
+    } else {
+      half = pow(x, (n - 1) / 2);
+      return half * half * x;
+    }
+  }

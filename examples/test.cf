@@ -1,0 +1,10 @@
+while (a) {
+if (a) {
+  doA();
+} else if (b) {
+  doB();
+} else {
+  return;
+}
+}
+doSome();

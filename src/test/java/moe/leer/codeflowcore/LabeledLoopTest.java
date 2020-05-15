@@ -8,7 +8,15 @@ import org.testng.annotations.Test;
  */
 @Test
 public class LabeledLoopTest extends BaseFlowchartTest {
-  public void test() {
-    baseFlowchartFileTest("label.cf");
+  public void labeledFor() {
+    baseFlowchartFileTest("labeledFor.cf");
+    baseFlowchartFileTest("labeledFor1.cf");
   }
+
+  // 2
+  public void labeledWhile() {
+    baseFlowchartFileTest("labeledWhile.cf");
+    baseFlowchartFileTest("labeledDoWhile.cf");
+  }
+
 }

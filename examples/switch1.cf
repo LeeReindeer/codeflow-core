@@ -1,4 +1,4 @@
-int a = 0;
+int a;
 switch(type) {
   case DOWHILE:
     a = 1;
@@ -11,9 +11,6 @@ switch(type) {
     break;
   case IF:
     a = 4;
-    break;
-  default:
-    a = 0;
     break;
 }
 println(a);

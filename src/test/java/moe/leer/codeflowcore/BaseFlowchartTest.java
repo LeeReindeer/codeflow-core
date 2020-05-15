@@ -1,9 +1,8 @@
 package moe.leer.codeflowcore;
 
 import guru.nidi.graphviz.engine.Format;
+import moe.leer.codeflowcore.exception.CodeFlowException;
 import org.testng.annotations.BeforeClass;
-
-import java.io.IOException;
 
 /**
  * @author leer
@@ -24,6 +23,7 @@ public abstract class BaseFlowchartTest {
 //    FlowchartConfig.setDecisionCompass("s", "w");
     codeFlow = CodeFlow.builder()
         .failFast(true)
+        .strictMode(false)
         .useNative(true)
         .workDir("examples")
         .outDir("tests")
@@ -38,7 +38,16 @@ public abstract class BaseFlowchartTest {
       } else {
         codeFlow.parse(code).toFile(outputFileName);
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
+      if (e instanceof CodeFlowException) {
+        Throwable t = e.getCause();
+        if (t instanceof RuntimeException) {
+          throw (RuntimeException) t;
+        }
+        if (t instanceof Error) {
+          throw (Error) t;
+        }
+      }
       e.printStackTrace();
     }
   }
@@ -56,7 +65,16 @@ public abstract class BaseFlowchartTest {
       } else {
         codeFlow.parseFile(inputFilepath).toFile(outputFileName);
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
+      if (e instanceof CodeFlowException) {
+        Throwable t = e.getCause();
+        if (t instanceof RuntimeException) {
+          throw (RuntimeException) t;
+        }
+        if (t instanceof Error) {
+          throw (Error) t;
+        }
+      }
       e.printStackTrace();
     }
   }

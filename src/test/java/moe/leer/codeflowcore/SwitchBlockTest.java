@@ -12,6 +12,7 @@ public class SwitchBlockTest extends BaseFlowchartTest {
   @Test
   public void testSwitch() throws IOException {
     baseFlowchartFileTest("switch.cf");
+    baseFlowchartFileTest("switch1.cf");
   }
 
   @Test

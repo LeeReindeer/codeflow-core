@@ -1,9 +1,6 @@
               if (prev != null) {
                 prev.stops.addLink(cur.start);
                 if (prev.type == IF) {
-                  if (prev.start == null) {
-                    return;
-                  }
                   prev.start.addLink(cur.start).with("false");
                 }
                 prev = cur;

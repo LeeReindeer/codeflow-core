@@ -1,0 +1,6 @@
+int x = a();
+
+int a() {
+  println("call a");
+  return 1;
+}

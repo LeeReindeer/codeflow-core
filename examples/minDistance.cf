@@ -1,0 +1,13 @@
+   // 530
+    public int minDiffInBST(TreeNode root) {
+        inOrder(root);
+        return minDiff;
+    }
+
+    private void inOrder(TreeNode root){
+        if(root == null) return;
+        inOrder(root.left);
+        if(preNode != null) minDiff = Math.min(minDiff, root.val - preNode.val);
+        preNode = root;
+        inOrder(root.right);
+    }

@@ -1,0 +1,13 @@
+    outer:
+    for (int i = 0; i < 10; i++) {
+      test();
+      inner:
+      for (int j = 0; j < 11; j++) {
+        if (j == 7) continue outer;
+        if (i == 8) continue inner;
+        if (j == 9) break outer;
+        if (j == 10) break inner;
+        System.out.println(j);
+      }
+    }
+    doDome()

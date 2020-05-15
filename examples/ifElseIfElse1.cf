@@ -1,0 +1,9 @@
+            if (score >= 90) {
+              println("excellent");
+            } else if (score >= 70) {
+              println("goode");
+            } else if(score >= 60) {
+              println("so so");
+            } else {
+              println("bad");
+            }

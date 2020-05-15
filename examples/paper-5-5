@@ -1,0 +1,12 @@
+// 多重循环
+outer:
+while (C1) {
+  Process1;
+  inner:
+  while (C2) {
+    if (C3) continue inner;
+    if (C4) break outer;
+    Process2;
+  }
+  Process3;
+}

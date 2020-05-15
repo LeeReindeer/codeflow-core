@@ -1,0 +1,5 @@
+// for each 循环
+List<T> list;
+for (T t : list) {
+  Process1;
+}

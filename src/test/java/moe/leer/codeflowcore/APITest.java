@@ -1,6 +1,8 @@
 package moe.leer.codeflowcore;
 
 import guru.nidi.graphviz.engine.Format;
+import moe.leer.codeflowcore.exception.CodeFlowException;
+import moe.leer.codeflowcore.exception.SemanticErrorException;
 import moe.leer.codeflowcore.exception.SyntaxErrorException;
 import org.graphviz.SWIGTYPE_p_Agraph_t;
 import org.graphviz.gv;
@@ -17,7 +19,7 @@ import java.io.IOException;
  */
 public class APITest extends BaseFlowchartTest {
   @Test(expectedExceptions = SyntaxErrorException.class)
-  public void failFastTest() throws IOException {
+  public void failFastTest() throws IOException, CodeFlowException {
     codeFlow.setFailFast(true).parse("boolean  a = false; \n" +
         "if (a) {").toFile("failFast");
     codeFlow.setFailFast(false);
@@ -31,7 +33,12 @@ public class APITest extends BaseFlowchartTest {
         .outDir("tests")
         .format(Format.PNG)
         .build();
-    BufferedImage image = codeFlow.parseFile("ifCode.cf").toImage();
+    BufferedImage image = null;
+    try {
+      image = codeFlow.parseFile("ifCode.cf").toImage();
+    } catch (CodeFlowException e) {
+      e.printStackTrace();
+    }
     JFrame frame = new JFrame();
     frame.getContentPane().setLayout(new FlowLayout());
     JPanel jPanel = new JPanel();
@@ -57,9 +64,28 @@ public class APITest extends BaseFlowchartTest {
 //    boolean file = gv.write(g, "graph");
   }
 
-  @Test
-  public void testExample1() {
-    baseFlowchartFileTest("binarySearch.cf");
+  @Test(expectedExceptions = SyntaxErrorException.class, expectedExceptionsMessageRegExp = ".*From Lexer.*")
+  public void testLexerError() {
+    baseFlowchartTest("int a = 1;\n#", "testLexerError");
   }
 
+  @Test(expectedExceptions = SyntaxErrorException.class, expectedExceptionsMessageRegExp = ".*From Parser.*")
+  public void testParserError() {
+//    baseFlowchartTest("if(a==1){else}", "testParserError");
+    baseFlowchartTest(" int 1a = 1;", "testParserError");
+  }
+
+  @Test(expectedExceptions = SemanticErrorException.class)
+  public void testSemanticError() {
+    baseFlowchartTest("label:\n" +
+        "if(a==1) {continue label;}", "testSemanticError");
+  }
+
+  @Test(expectedExceptions = SemanticErrorException.class)
+  // enable semanticCheck() strict mode
+  public void testVariableDefResolve() {
+    codeFlow.setStrictMode(true);
+    baseFlowchartTest("if(a == 1) {doSome();}", "testVariableDefResolve");
+    codeFlow.setStrictMode(false);
+  }
 }

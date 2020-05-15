@@ -1,0 +1,14 @@
+// 函数调用
+int a = a();
+
+int a() {
+  return b();
+}
+
+int b() {
+  return c();
+}
+
+int c() {
+  return a();
+}

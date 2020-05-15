@@ -7,5 +7,4 @@ void b() {
 }
 
 void c() {
-  a();
 }

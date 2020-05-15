@@ -1,0 +1,12 @@
+    outer:
+    do {
+      test();
+      inner:
+      do {
+        if (j == 7) continue outer;
+        if (i == 8) continue inner;
+        if (j == 9) break outer;
+        System.out.println(j);
+      } while(C2);
+    }while(C1);
+    doDome()

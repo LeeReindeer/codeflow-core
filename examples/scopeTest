@@ -1,0 +1,13 @@
+int m;
+int n;
+
+void a()
+{
+  {int m = n;}
+  int m;
+  m = 2;
+  n = 1;
+}
+
+void b(int z)
+{}

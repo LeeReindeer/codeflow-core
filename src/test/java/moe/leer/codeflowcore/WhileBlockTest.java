@@ -11,21 +11,36 @@ import java.io.IOException;
 public class WhileBlockTest extends BaseFlowchartTest {
   @Test
   public void testWhile() throws IOException {
-    codeFlow.parseFile("while.cf").toFile("while");
+    baseFlowchartFileTest("while.cf");
+    baseFlowchartFileTest("whileNestIf.cf");
   }
 
   @Test
   public void testDoWhile() throws IOException {
-    codeFlow.parseFile("dowhile.cf").toFile("dowhile");
+    baseFlowchartFileTest("dowhile.cf");
+    baseFlowchartFileTest("dowhileNestIf.cf");
   }
+
+  // 嵌套循环 2
+  @Test
+  public void testNestedWhile() {
+
+  }
+
+  // 嵌套循环 2
+  @Test
+  public void testNestedDoWhile() {
+
+  }
+
 
   @Test
   public void testWhileBreak() throws IOException {
-    codeFlow.parseFile("twoSumSorted.cf").toFile("whileBreak");
+    baseFlowchartFileTest("twoSumSorted.cf", "whileBreak");
   }
 
   @Test
   public void testDoWhileBreak() throws IOException {
-    codeFlow.parseFile("dowhileBreak.cf").toFile("dowhileBreak");
+    baseFlowchartFileTest("dowhileBreak.cf");
   }
 }

@@ -14,8 +14,10 @@ import java.util.List;
 @Test
 public class ForBlockTest extends BaseFlowchartTest {
 
+  // 1 + 4,  TODO 三个表达式可缺失
   @Test
   public void testForCode() throws IOException {
+    codeFlow.setStrictMode(false);
     baseFlowchartFileTest("forCode.cf");
   }
 
@@ -24,10 +26,11 @@ public class ForBlockTest extends BaseFlowchartTest {
     baseFlowchartFileTest("forNestIf.cf");
   }
 
+  // 嵌套循环
   @Test
   public void testNestedFor() throws IOException {
     baseFlowchartFileTest("nestedFor.cf");
-    baseFlowchartFileTest("nestedFor2.cf");
+//    baseFlowchartFileTest("nestedFor2.cf");
   }
 
   @Test
@@ -51,21 +54,17 @@ public class ForBlockTest extends BaseFlowchartTest {
     }
     Iterator<Integer> it = list.iterator();
     while (it.hasNext()) {
-      int a= it.next();
+      int a = it.next();
       System.out.println(a);
     }
 
     baseFlowchartFileTest("forEach.cf");
   }
 
-  @Test
-  public void mulTable() {
-    for (int i = 1; i < 10; i++) {
-      for (int j = 1; j <= i; j++) {
-        if (j != 1) System.out.print(" ");
-        System.out.printf("%d*%d=%d", i, j, i * j);
-      }
-      System.out.println();
-    }
+  public void forScopeTest() {
+    baseFlowchartTest("int a = 1;\n" +
+        "for(int a = 1; a < 10 ;a++) {\n" +
+        "    doSome();\n" +
+        "}", "forScopeTest");
   }
 }

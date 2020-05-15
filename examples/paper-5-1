@@ -1,0 +1,15 @@
+// 有非结构化语句的while循环
+while(C1) {
+  if(C2) {
+    break;
+  }
+  if (C3) {
+    continue;
+  }
+  if (C4) {
+    return;
+  }
+  if (C5) {
+    throw new RuntimeException();
+  }
+}
