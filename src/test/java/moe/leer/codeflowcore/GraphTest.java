@@ -20,6 +20,8 @@ import static guru.nidi.graphviz.model.Factory.mutGraph;
 import static guru.nidi.graphviz.model.Factory.mutNode;
 
 /**
+ * Test Graphviz-java's API
+ *
  * @author leer
  * Created at 12/6/19 3:37 PM
  */

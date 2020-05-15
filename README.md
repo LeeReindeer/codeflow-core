@@ -147,7 +147,7 @@ Above code will generate a flowchart like:
 
 ![binarySearch](examples/binarySearch.png)
 
-See more example at [examples folder](examples/).
+See more examples at [examples folder](examples/) and [test folder](src/test/java/moe/leer/codeflowcore).
 
 ## How it works
 
@@ -155,7 +155,7 @@ See more example at [examples folder](examples/).
 
 - And then, visit the AST to build flowchart fragment:
     - The single flowchart fragment is built directly
-    - The complex flowchart fragment(like nested conditions and loops) is built recursively
+    - The complex flowchart fragment(like **nested** if statements and loops) is built recursively
 
 - Use [graphviz-java](https://github.com/nidi3/graphviz-java) library convert node data structure to [dot](https://en.wikipedia.org/wiki/DOT_\(graph_description_language\)) file.
 
